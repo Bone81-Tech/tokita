@@ -1,21 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Static export for Cloudflare Pages
+  output: 'export',
+  
+  // Disable image optimization for static export
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'ik.imagekit.io',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-    ],
+    unoptimized: true,
   },
+  
+  // Trailing slash for better Cloudflare Pages compatibility
+  trailingSlash: true,
 };
 
 export default nextConfig;

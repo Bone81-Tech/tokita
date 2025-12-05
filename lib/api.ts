@@ -1,16 +1,15 @@
 import type { Product, ApiResponse } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Direct Google Apps Script URL
+const GAS_URL = process.env.NEXT_PUBLIC_GAS_URL || 'https://script.google.com/macros/s/AKfycbyM0UUfQ7gAy9bLv4WF0wv9QKinnHi7IQ1TAFP6m2IbxVC5zF8m441eEXy5fQKJ2z6TEw/exec';
 
 // Generic fetch wrapper with error handling
 async function fetchAPI<T = any>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-  
   try {
-    const response = await fetch(url, {
+    const response = await fetch(endpoint, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -36,12 +35,13 @@ async function fetchAuthAPI<T = any>(
 ): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
   
+  // For GAS, we send token in body instead of headers
+  const body = options?.body ? JSON.parse(options.body as string) : {};
+  body.token = token;
+  
   return fetchAPI<T>(endpoint, {
     ...options,
-    headers: {
-      ...options?.headers,
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+    body: JSON.stringify(body),
   });
 }
 
@@ -49,19 +49,19 @@ async function fetchAuthAPI<T = any>(
 export const productAPI = {
   // Get all products
   async getAll(): Promise<Product[]> {
-    const data = await fetchAPI<ApiResponse>('/products');
+    const data = await fetchAPI<ApiResponse>(GAS_URL);
     return data.products || [];
   },
 
   // Get products by category
   async getByCategory(category: string): Promise<Product[]> {
-    const data = await fetchAPI<ApiResponse>(`/products/filter?category=${category}`);
+    const data = await fetchAPI<ApiResponse>(`${GAS_URL}?category=${category}`);
     return data.products || [];
   },
 
   // Create product (authenticated)
   async create(product: Partial<Product>): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>('/admin/products', {
+    return fetchAuthAPI<ApiResponse>(GAS_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'create_product', data: product }),
     });
@@ -69,7 +69,7 @@ export const productAPI = {
 
   // Update product (authenticated)
   async update(product: Product): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>('/admin/products', {
+    return fetchAuthAPI<ApiResponse>(GAS_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'update_product', data: product }),
     });
@@ -77,29 +77,29 @@ export const productAPI = {
 
   // Delete product (authenticated)
   async delete(id: string): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>('/admin/products', {
+    return fetchAuthAPI<ApiResponse>(GAS_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'delete_product', id }),
     });
   },
 };
 
-// Auth API
+// Auth API - Direct to GAS
 export const authAPI = {
   // Login
   async login(username: string, password: string): Promise<{ status: string; token?: string; message?: string }> {
-    return fetchAPI('/auth/login', {
+    return fetchAPI(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ action: 'login', username, password }),
     });
   },
 
   // Verify token
   async verify(token: string): Promise<boolean> {
     try {
-      const response = await fetchAPI('/auth/verify', {
+      const response = await fetchAPI(GAS_URL, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'verify', token }),
       });
       return response.status === 'success';
     } catch {
@@ -108,11 +108,15 @@ export const authAPI = {
   },
 };
 
-// ImageKit API
+// ImageKit API - Direct to GAS for auth, then to ImageKit for upload
 export const imagekitAPI = {
-  // Get authentication parameters
+  // Get authentication parameters from GAS
   async getAuthParams(): Promise<{ signature: string; expire: number; token: string }> {
-    return fetchAuthAPI('/imagekit/auth');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
+    return fetchAPI(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'imagekit_auth', token }),
+    });
   },
 
   // Upload image
