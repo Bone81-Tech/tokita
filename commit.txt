@@ -1,6 +1,3 @@
-Initial commit: Tokita Catalog MVP with Developer Dashboard
+Update footer with Developer shortcut
 
-- Frontend: Grocery Catalog theme (Refactored from Buletin)
-- Backend: Integration with Google Apps Script (GAS)
-- Storage: ImageKit integration with Direct Upload
-- Features: Developer Dashboard (CRUD), Login System
+- Added discrete link to developer.html in index.html footer
