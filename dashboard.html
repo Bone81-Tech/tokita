@@ -204,6 +204,7 @@
                 submitting: false,
                 uploading: false,
                 notification: { show: false, message: '', type: 'success' },
+                token: '',
                 
                 // Form Data
                 formData: {
@@ -213,15 +214,14 @@
                     price: '',
                     promo_price: '',
                     category: 'sembako',
-                    // Default placeholder if empty? No, better keep empty
                     image: '',
                     rating: '5.0'
                 },
 
                 init() {
-                    // Check logic
-                    const session = localStorage.getItem('tokita_admin_session');
-                    if (!session) {
+                    // Check Token
+                    this.token = localStorage.getItem('tokita_token');
+                    if (!this.token) {
                         window.location.href = 'developer.html';
                         return;
                     }
@@ -229,19 +229,38 @@
                 },
 
                 logout() {
+                    localStorage.removeItem('tokita_token');
                     localStorage.removeItem('tokita_admin_session');
                     window.location.href = 'developer.html';
+                },
+
+                // Helper for Authenticated Fetch
+                async authFetch(url, options = {}) {
+                    const headers = {
+                        'Authorization': `Bearer ${this.token}`,
+                        ...options.headers
+                    };
+                    
+                    const response = await fetch(url, { ...options, headers });
+                    
+                    if (response.status === 401) {
+                        // Token expired or invalid
+                        this.logout();
+                        throw new Error('Sesi berakhir. Silakan login kembali.');
+                    }
+                    
+                    return response;
                 },
 
                 async fetchProducts() {
                     this.loading = true;
                     try {
-                        const response = await fetch(config.apiUrl);
+                        const response = await this.authFetch(config.apiUrl);
                         const data = await response.json();
                         // Filter valid products only
                         this.products = (data.products || []).filter(p => p.id && !String(p.name).includes('Nama Produk'));
                     } catch (error) {
-                        this.showNotification('Gagal memuat data produk', 'error');
+                        this.showNotification(error.message, 'error');
                         console.error(error);
                     } finally {
                         this.loading = false;
@@ -275,13 +294,12 @@
                     this.uploading = true;
                     
                     try {
-                        // 1. Get Authentication Parameters from GAS
-                        // Append &action=auth to URL. GAS doGet must handle this.
-                        const authResponse = await fetch(config.apiUrl + '?action=auth');
+                        // 1. Get Authentication Parameters from GAS (via Proxy)
+                        const authResponse = await this.authFetch(config.apiUrl + '?action=auth');
                         const authData = await authResponse.json();
                         
                         if (!authData.signature) {
-                            throw new Error('Gagal mendapatkan signature Auth dari GAS.');
+                            throw new Error('Gagal mendapatkan signature Auth.');
                         }
                         
                         // 2. Prepare Form Data for ImageKit Upload
@@ -293,9 +311,9 @@
                         formData.append('expire', authData.expire);
                         formData.append('token', authData.token);
                         formData.append('useUniqueFileName', 'true');
-                        formData.append('folder', '/tokita_products'); // Optional folder
+                        formData.append('folder', '/tokita_products');
                         
-                        // 3. Upload to ImageKit
+                        // 3. Upload to ImageKit (Direct to ImageKit, no auth header needed for this call)
                         const uploadResponse = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
                             method: 'POST',
                             body: formData
@@ -315,7 +333,6 @@
                         this.showNotification('Error Upload: ' + error.message, 'error');
                     } finally {
                         this.uploading = false;
-                        // Reset file input
                         event.target.value = ''; 
                     }
                 },
@@ -331,14 +348,14 @@
                     const action = this.modalMode === 'create' ? 'create_product' : 'update_product';
                     
                     try {
-                        // Use fetch with POST to GAS Web App
                         const payload = {
                             action: action,
                             data: this.formData
                         };
 
-                        const response = await fetch(config.apiUrl, {
+                        const response = await this.authFetch(config.apiUrl, {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
                         });
 
@@ -369,8 +386,9 @@
                             id: product.id
                         };
                         
-                        const response = await fetch(config.apiUrl, {
+                        const response = await this.authFetch(config.apiUrl, {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
                         });
                         

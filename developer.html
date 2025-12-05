@@ -31,8 +31,9 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline transition-colors" type="submit">
-                    Masuk
+                <button :disabled="isLoading" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline transition-colors disabled:opacity-50" type="submit">
+                    <span x-show="!isLoading">Masuk</span>
+                    <span x-show="isLoading">Memproses...</span>
                 </button>
             </div>
             
@@ -46,15 +47,43 @@
                 username: '',
                 password: '',
                 errorMessage: '',
+                isLoading: false,
                 
-                login() {
-                    // Hardcoded credentials for simplicity as per plan
-                    if (this.username === 'developer' && this.password === 'tokita2025') {
-                        // Set session and redirect
-                        localStorage.setItem('tokita_admin_session', 'true');
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        this.errorMessage = 'Username atau Password salah!';
+                async login() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+
+                    try {
+                        const response = await fetch('/api', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                action: 'login',
+                                username: this.username,
+                                password: this.password
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.status === 'success' && data.token) {
+                            // Store Token securely
+                            localStorage.setItem('tokita_token', data.token);
+                            // Also keep the old session flag for backward compatibility if needed, 
+                            // but reliance should be on token now.
+                            localStorage.setItem('tokita_admin_session', 'true'); 
+                            
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            this.errorMessage = data.message || 'Login gagal. Periksa username dan password.';
+                        }
+                    } catch (error) {
+                        console.error('Login Error:', error);
+                        this.errorMessage = 'Terjadi kesalahan sistem. Coba lagi nanti.';
+                    } finally {
+                        this.isLoading = false;
                     }
                 }
             }

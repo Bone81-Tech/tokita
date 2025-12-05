@@ -1,4 +1,7 @@
-Add Cloudflare Pages Functions for API Proxy
+Security Upgrade: Implement Server-Side Auth & JWT
 
-- Create /functions/api.js to proxy requests to GAS (fixes CORS)
-- Update config.js to use local /api endpoint
+- Moved auth logic to Cloudflare Functions (functions/api.js)
+- Implemented JWT token generation and verification
+- Added strict security headers (CSP, HSTS, etc.)
+- Updated developer.html to use secure login API
+- Updated dashboard.html to use Bearer token auth
