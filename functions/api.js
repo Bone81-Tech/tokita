@@ -25,7 +25,8 @@ export async function onRequest(context) {
     headers.set("X-Frame-Options", "DENY");
     headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     // CSP: Izinkan script dari CDN yang kita pakai (Tailwind, Alpine, ImageKit)
-    headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://upload.imagekit.io;");
+    // Note: Alpine.js requires 'unsafe-eval' for its reactivity system.
+    headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://upload.imagekit.io;");
     return headers;
   }
 
