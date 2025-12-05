@@ -1,17 +1,21 @@
 // ImageKit configuration for Tokita product showcase
 // Replace with your actual ImageKit credentials
-const imagekitConfig = {
-    publicKey: 'your_public_key', // Client-side uploads not implemented yet, so this might not be strictly needed for display
-    urlEndpoint: 'https://ik.imagekit.io/yzsmfytxo',
-    authenticationEndpoint: '/api/auth'
-};
+if (typeof imagekitConfig === 'undefined') {
+    var imagekitConfig = {
+        publicKey: 'your_public_key', // Client-side uploads not implemented yet, so this might not be strictly needed for display
+        urlEndpoint: 'https://ik.imagekit.io/yzsmfytxo',
+        authenticationEndpoint: '/api/auth'
+    };
+}
 
-// Initialize ImageKit
-const imagekit = new ImageKit({
-    publicKey: imagekitConfig.publicKey,
-    urlEndpoint: imagekitConfig.urlEndpoint,
-    authenticationEndpoint: imagekitConfig.authenticationEndpoint
-});
+// Initialize ImageKit (only if SDK is loaded)
+if (typeof ImageKit !== 'undefined' && typeof imagekit === 'undefined') {
+    var imagekit = new ImageKit({
+        publicKey: imagekitConfig.publicKey,
+        urlEndpoint: imagekitConfig.urlEndpoint,
+        authenticationEndpoint: imagekitConfig.authenticationEndpoint
+    });
+}
 
 // Function to get optimized image URL
 function getImageUrl(imagePath, options = {}) {
