@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Login - Tokita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+
+    <div x-data="loginForm()" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-indigo-700">Developer Access</h1>
+            <p class="text-gray-500">Masuk untuk mengelola produk Tokita</p>
+        </div>
+
+        <form @submit.prevent="login">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                    Username
+                </label>
+                <input x-model="username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500" id="username" type="text" placeholder="Username">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                    Password
+                </label>
+                <input x-model="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500" id="password" type="password" placeholder="******************">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline transition-colors" type="submit">
+                    Masuk
+                </button>
+            </div>
+            
+            <p x-show="errorMessage" x-text="errorMessage" class="text-red-500 text-xs italic mt-4 text-center"></p>
+        </form>
+    </div>
+
+    <script>
+        function loginForm() {
+            return {
+                username: '',
+                password: '',
+                errorMessage: '',
+                
+                login() {
+                    // Hardcoded credentials for simplicity as per plan
+                    if (this.username === 'developer' && this.password === 'tokita2025') {
+                        // Set session and redirect
+                        localStorage.setItem('tokita_admin_session', 'true');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        this.errorMessage = 'Username atau Password salah!';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

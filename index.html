@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Katalog Produk TOKITA - Belanja Hemat & Lengkap</title>
+    <meta
+      name="description"
+      content="Katalog Produk TOKITA - Temukan berbagai kebutuhan pokok, sembako, dan jajanan hemat di sini."
+    />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- ImageKit.io script -->
+    <script src="https://cdn.imagekit.io/js-sdk/1.x.x/imagekit.min.js"></script>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .product-card {
+        transition: all 0.3s ease;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav
+      x-data="{ isOpen: false }"
+      class="bg-white shadow-md sticky top-0 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href="/" class="flex-shrink-0 flex items-center gap-2">
+              <img src="images/LOGO.webp" alt="Tokita Logo" class="h-20 w-auto object-contain" />
+            </a>
+          </div>
+
+          <div class="hidden md:flex items-center space-x-8">
+            <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium"
+              >Beranda</a
+            >
+            <a
+              href="#products"
+              class="text-gray-700 hover:text-indigo-600 font-medium"
+              >Katalog</a
+            >
+            <a
+              href="#promo"
+              class="text-gray-700 hover:text-indigo-600 font-medium"
+              >Promo</a
+            >
+            <a
+              href="#about"
+              class="text-gray-700 hover:text-indigo-600 font-medium"
+              >Tentang Kami</a
+            >
+          </div>
+
+          <div class="md:hidden flex items-center">
+            <button @click="isOpen = !isOpen" class="text-gray-700 p-2">
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  x-show="!isOpen"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+                <path
+                  x-show="isOpen"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div x-show="isOpen" class="md:hidden bg-white border-t">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a
+            href="#"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+            >Beranda</a
+          >
+          <a
+            href="#products"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+            >Katalog</a
+          >
+          <a
+            href="#promo"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+            >Promo</a
+          >
+          <a
+            href="#about"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+            >Tentang Kami</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative bg-indigo-700 overflow-hidden">
+      <div class="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          alt="Supermarket background"
+          class="w-full h-full object-cover opacity-20"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-indigo-800 to-indigo-600 mix-blend-multiply"
+        ></div>
+      </div>
+      <div
+        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32"
+      >
+        <div class="text-center">
+          <h1
+            class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-4 drop-shadow-lg"
+          >
+            Belanja Hemat di TOKITA
+          </h1>
+          <p class="text-xl md:text-2xl text-indigo-100 mb-8 max-w-3xl mx-auto">
+            Katalog lengkap kebutuhan harian Anda. Mulai dari sembako, makanan
+            ringan, hingga kebutuhan rumah tangga.
+          </p>
+          <div class="flex justify-center gap-4">
+            <a
+              href="#products"
+              class="bg-yellow-400 text-indigo-900 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-300 transition-transform transform hover:-translate-y-1"
+            >
+              Lihat Katalog
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Katalog Produk
+          </h2>
+          <div class="w-20 h-1 bg-indigo-600 mx-auto rounded-full mb-4"></div>
+
+          <!-- Product Categories -->
+          <div
+            x-data="productFilter"
+            class="mt-8 flex flex-wrap justify-center gap-2"
+          >
+            <button
+              @click="filter('all')"
+              :class="{'bg-indigo-600 text-white shadow-lg': isActive('all'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('all')}"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+            >
+              Semua
+            </button>
+            <button
+              @click="filter('sembako')"
+              :class="{'bg-indigo-600 text-white shadow-lg': isActive('sembako'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('sembako')}"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+            >
+              Sembako
+            </button>
+            <button
+              @click="filter('makanan')"
+              :class="{'bg-indigo-600 text-white shadow-lg': isActive('makanan'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('makanan')}"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+            >
+              Makanan Instan
+            </button>
+            <button
+              @click="filter('minuman')"
+              :class="{'bg-indigo-600 text-white shadow-lg': isActive('minuman'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('minuman')}"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+            >
+              Minuman
+            </button>
+            <button
+              @click="filter('rumahtangga')"
+              :class="{'bg-indigo-600 text-white shadow-lg': isActive('rumahtangga'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('rumahtangga')}"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+            >
+              Rumah Tangga
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div
+          id="product-grid"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
+          hx-get="/api/products/filter"
+          hx-trigger="load"
+        >
+          <!-- Products will be loaded dynamically -->
+        </div>
+
+        <!-- Load More Button -->
+        <div class="mt-12 text-center">
+          <button
+            id="load-more-btn"
+            hx-get="/api/products"
+            hx-trigger="click"
+            hx-target="#product-grid"
+            hx-swap="beforeend"
+            class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
+          >
+            Muat Lebih Banyak
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center">
+          <div class="md:w-1/2 mb-10 md:mb-0">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">
+              Tentang TOKITA
+            </h2>
+            <p class="text-gray-600 mb-4">
+              TOKITA adalah pusat belanja kebutuhan harian terpercaya Anda.
+              Kami menyediakan berbagai macam produk sembako, makanan ringan,
+              dan kebutuhan rumah tangga dengan harga terbaik.
+            </p>
+            <p class="text-gray-600">
+              Komitmen kami adalah memberikan pengalaman belanja yang hemat,
+              lengkap, dan mudah bagi setiap pelanggan.
+            </p>
+          </div>
+          <div class="md:w-1/2 flex justify-center">
+            <img
+               src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+               alt="Toko Tokita"
+               class="rounded-xl shadow-lg w-full max-w-md object-cover h-64 md:h-80"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <h3 class="text-xl font-bold mb-4">TOKITA</h3>
+            <p class="text-gray-400">
+              Belanja hemat, hati senang. Lengkapi kebutuhan harianmu di Tokita.
+            </p>
+          </div>
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Kategori</h4>
+            <ul class="space-y-2">
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white"
+                  >Sembako</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white">Makanan</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white">Minuman</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white"
+                  >Rumah Tangga</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Layanan</h4>
+            <ul class="space-y-2">
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white"
+                  >Cara Belanja</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white">Promo</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white">Lokasi Toko</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white"
+                  >Hubungi Kami</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Kontak</h4>
+            <address class="not-italic text-gray-400">
+              <p>Jl. Raya Tokita No. 88</p>
+              <p>Jakarta, Indonesia</p>
+              <p class="mt-2">cs@tokita.com</p>
+              <p>WA: 0812-3456-7890</p>
+            </address>
+          </div>
+        </div>
+        <div
+          class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400"
+        >
+          <p>&copy; 2025 Tokita Market. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/imagekit.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/api.js"></script>
+  </body>
+</html>
