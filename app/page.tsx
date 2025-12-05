@@ -1,0 +1,45 @@
+import Navigation from '@/components/Navigation';
+import Hero from '@/components/Hero';
+import ProductGrid from '@/components/ProductGrid';
+import Footer from '@/components/Footer';
+
+export default function Home() {
+  return (
+    <div className="bg-gray-50">
+      <Navigation />
+      <Hero />
+      <ProductGrid />
+      
+      {/* About Section */}
+      <section id="about" className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center">
+            <div className="md:w-1/2 mb-10 md:mb-0">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Tentang TOKITA
+              </h2>
+              <p className="text-gray-600 mb-4">
+                TOKITA adalah pusat belanja kebutuhan harian terpercaya Anda.
+                Kami menyediakan berbagai macam produk sembako, makanan ringan,
+                dan kebutuhan rumah tangga dengan harga terbaik.
+              </p>
+              <p className="text-gray-600">
+                Komitmen kami adalah memberikan pengalaman belanja yang hemat,
+                lengkap, dan mudah bagi setiap pelanggan.
+              </p>
+            </div>
+            <div className="md:w-1/2 flex justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                alt="Toko Tokita"
+                className="rounded-xl shadow-lg w-full max-w-md object-cover h-64 md:h-80"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
