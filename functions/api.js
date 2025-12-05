@@ -77,6 +77,101 @@ export async function onRequest(context) {
 
   // --- MAIN LOGIC ---
 
+  const { pathname, searchParams } = url;
+
+  // --- PUBLIC HTMX PRODUCT ROUTES ---
+  // This block handles unauthenticated GET requests from the frontend for products.
+  // It fetches data, renders HTML, and returns it, bypassing the auth block below.
+  if (request.method === "GET" && (pathname.startsWith('/api/products'))) {
+    try {
+      // Fetch all data from the source
+      const gasResponse = await fetch(GAS_URL);
+      if (!gasResponse.ok) {
+        throw new Error(`GAS request failed with status ${gasResponse.status}`);
+      }
+      const data = await gasResponse.json();
+      const allProducts = (data.products || []).filter(p => 
+            p.id && 
+            !String(p.id).toLowerCase().includes('kolom') && 
+            !String(p.name).includes('Nama Produk')
+        );
+
+      // --- Server-side Rendering Logic (adapted from js/products.js) ---
+        
+      // Get query params
+      const category = searchParams.get('category') || 'all';
+      const page = parseInt(searchParams.get('page') || '1', 10);
+      const ITEMS_PER_PAGE = 8;
+
+      // Filter products
+      const filteredProducts = category === 'all'
+        ? allProducts
+        : allProducts.filter(p => p.category && p.category.toLowerCase() === category.toLowerCase());
+
+      // Paginate products
+      const startIndex = (page - 1) * ITEMS_PER_PAGE;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+      
+      // HTML Rendering Function
+      function renderProductCards(products) {
+          if (!products || products.length === 0) {
+              return '<div class="col-span-full text-center py-10 text-gray-500">Belum ada produk untuk kategori ini.</div>';
+          }
+          return products.map(product => {
+              const imageUrl = product.image || 'https://placehold.co/400x300?text=No+Image';
+              let displayPrice = product.price;
+              if (typeof product.price === 'number') {
+                  displayPrice = 'Rp ' + product.price.toLocaleString('id-ID');
+              }
+              const promoPrice = product.promo_price ? (typeof product.promo_price === 'number' ? 'Rp ' + product.promo_price.toLocaleString('id-ID') : product.promo_price) : null;
+
+              return `
+              <div class="product-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div class="relative">
+                      <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=Produk+Tokita';">
+                      ${product.rating ? `<div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 text-sm font-semibold text-indigo-600">${product.rating} ★</div>` : ''}
+                      ${promoPrice ? `<div class="absolute top-2 left-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold">PROMO</div>` : ''}
+                  </div>
+                  <div class="p-5">
+                      <div class="flex flex-col h-full justify-between">
+                          <div>
+                              <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${product.name || 'Nama Produk'}</h3>
+                              <p class="mt-1 text-gray-600 text-sm line-clamp-2">${product.description || ''}</p>
+                          </div>
+                          <div class="mt-4 flex items-center justify-between">
+                              <div class="flex flex-col">
+                                  ${promoPrice ? `<span class="text-xs text-gray-400 line-through">${displayPrice}</span>` : ''}
+                                  <span class="text-lg font-bold text-indigo-600">${promoPrice || displayPrice}</span>
+                              </div>
+                               <button class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors" hx-post="/api/cart/add" hx-vals='js:{productId: "${product.id}"}' aria-label="Add to cart">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005.92 1H3z" /></svg>
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>`;
+          }).join('');
+      }
+
+      const html = renderProductCards(paginatedProducts);
+      
+      const headers = new Headers({ "Content-Type": "text/html" });
+      addSecurityHeaders(headers);
+      
+      return new Response(html, { headers });
+
+    } catch (err) {
+      console.error('Error in public product route:', err);
+      // Return an error message as HTML
+      const errorHtml = '<div class="col-span-full text-center py-10 text-red-500">Gagal memuat produk. Silakan coba lagi nanti.</div>';
+      return new Response(errorHtml, { status: 500, headers: { "Content-Type": "text/html" }});
+    }
+  }
+
+
+  // --- PROTECTED/AUTHENTICATED ROUTES ---
+
   // Handle OPTIONS (Preflight)
   if (request.method === "OPTIONS") {
     return new Response(null, { headers: addSecurityHeaders(new Headers()) });

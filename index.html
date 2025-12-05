@@ -180,41 +180,45 @@
 
           <!-- Product Categories -->
           <div
-            x-data="productFilter"
             class="mt-8 flex flex-wrap justify-center gap-2"
           >
             <button
-              @click="filter('all')"
-              :class="{'bg-indigo-600 text-white shadow-lg': isActive('all'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('all')}"
-              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+              hx-get="/api/products/filter?category=all"
+              hx-target="#product-grid"
+              hx-swap="innerHTML"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 bg-indigo-600 text-white shadow-lg"
             >
               Semua
             </button>
             <button
-              @click="filter('sembako')"
-              :class="{'bg-indigo-600 text-white shadow-lg': isActive('sembako'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('sembako')}"
-              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+              hx-get="/api/products/filter?category=sembako"
+              hx-target="#product-grid"
+              hx-swap="innerHTML"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             >
               Sembako
             </button>
             <button
-              @click="filter('makanan')"
-              :class="{'bg-indigo-600 text-white shadow-lg': isActive('makanan'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('makanan')}"
-              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+              hx-get="/api/products/filter?category=makanan"
+              hx-target="#product-grid"
+              hx-swap="innerHTML"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             >
               Makanan Instan
             </button>
             <button
-              @click="filter('minuman')"
-              :class="{'bg-indigo-600 text-white shadow-lg': isActive('minuman'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('minuman')}"
-              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+              hx-get="/api/products/filter?category=minuman"
+              hx-target="#product-grid"
+              hx-swap="innerHTML"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             >
               Minuman
             </button>
             <button
-              @click="filter('rumahtangga')"
-              :class="{'bg-indigo-600 text-white shadow-lg': isActive('rumahtangga'), 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50': !isActive('rumahtangga')}"
-              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+              hx-get="/api/products/filter?category=rumahtangga"
+              hx-target="#product-grid"
+              hx-swap="innerHTML"
+              class="px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             >
               Rumah Tangga
             </button>
@@ -227,8 +231,9 @@
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
           hx-get="/api/products/filter"
           hx-trigger="load"
+          hx-swap="innerHTML"
         >
-          <!-- Products will be loaded dynamically -->
+          <div class="col-span-full text-center py-20"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div><p class="mt-2 text-gray-500">Memuat produk...</p></div>
         </div>
 
         <!-- Load More Button -->
@@ -351,7 +356,6 @@
 
     <script src="js/imagekit.js"></script>
     <script src="js/config.js"></script>
-    <script src="js/products.js"></script>
     <script src="js/api.js"></script>
   </body>
 </html>
