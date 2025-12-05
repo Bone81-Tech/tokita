@@ -1,7 +1,5 @@
-Security Upgrade: Implement Server-Side Auth & JWT
+Fix: Relax CSP to allow Alpine.js and Tailwind
 
-- Moved auth logic to Cloudflare Functions (functions/api.js)
-- Implemented JWT token generation and verification
-- Added strict security headers (CSP, HSTS, etc.)
-- Updated developer.html to use secure login API
-- Updated dashboard.html to use Bearer token auth
+- Added 'unsafe-eval' to script-src for Alpine.js support.
+- Added Content-Security-Policy to _headers for static files.
+- Ensured consistent CSP across functions and static assets.
