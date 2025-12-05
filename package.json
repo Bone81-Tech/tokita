@@ -1,0 +1,28 @@
+{
+  "name": "tokita",
+  "version": "1.0.0",
+  "description": "Welcome to the Tokita product showcase website. This is a modern, responsive product display built with HTMX, Alpine.js, and Tailwind CSS, optimized for Cloudflare Pages hosting.",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "build": "npm run build:css",
+    "build:css": "npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --minify",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bone81-Tech/tokita.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Bone81-Tech/tokita/issues"
+  },
+  "homepage": "https://github.com/Bone81-Tech/tokita#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "@tailwindcss/postcss": "^4.1.17",
+    "tailwindcss": "^4.1.17"
+  }
+}
