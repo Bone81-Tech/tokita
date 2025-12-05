@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { tokenManager } from '@/lib/auth';
+import { authAPI } from '@/lib/api';
 
 export default function DeveloperPage() {
   const router = useRouter();
@@ -18,13 +19,7 @@ export default function DeveloperPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
+      const data = await authAPI.login(username, password);
 
       if (data.status === 'success' && data.token) {
         tokenManager.set(data.token);
