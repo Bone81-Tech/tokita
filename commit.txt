@@ -1,3 +1,4 @@
-Update footer with Developer shortcut
+Add Cloudflare Pages Functions for API Proxy
 
-- Added discrete link to developer.html in index.html footer
+- Create /functions/api.js to proxy requests to GAS (fixes CORS)
+- Update config.js to use local /api endpoint
