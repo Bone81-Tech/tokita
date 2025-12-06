@@ -64,10 +64,7 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Kontak</h4>
             <address className="not-italic text-gray-400">
-              <p>Jl. Raya Tokita No. 88</p>
-              <p>Jakarta, Indonesia</p>
-              <p className="mt-2">cs@tokita.com</p>
-              <p>WA: 0812-3456-7890</p>
+              <p>Jl. Arif Rahman Hakim no. 150 Surabaya</p>
             </address>
           </div>
         </div>
@@ -80,6 +77,16 @@ export default function Footer() {
             >
               Developer
             </Link>
+          </div>
+          <div className="mt-1">
+            <a
+              href="https://bonedigitalservice.web.id"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Developed by Bone Digital Service
+            </a>
           </div>
         </div>
       </div>

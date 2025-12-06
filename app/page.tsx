@@ -19,7 +19,7 @@ export default function Home() {
                 Tentang TOKITA
               </h2>
               <p className="text-gray-600 mb-4">
-                TOKITA adalah pusat belanja kebutuhan harian terpercaya Anda.
+                TOKITA adalah koperasi karyawan Universitas Hangtuah Surabaya.
                 Kami menyediakan berbagai macam produk sembako, makanan ringan,
                 dan kebutuhan rumah tangga dengan harga terbaik.
               </p>
@@ -28,10 +28,20 @@ export default function Home() {
                 lengkap, dan mudah bagi setiap pelanggan.
               </p>
             </div>
-            <div className="md:w-1/2 flex justify-center">
+            <div className="md:w-1/2 flex flex-col items-center space-y-4">
               <img
-                src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                src="/images/gambar-depan-kecil.webp"
                 alt="Toko Tokita"
+                className="rounded-xl shadow-lg w-full max-w-md object-cover h-64 md:h-80"
+              />
+              <img
+                src="/images/gambar-rak-kiri-oke.webp"
+                alt="Rak Produk Kiri Tokita"
+                className="rounded-xl shadow-lg w-full max-w-md object-cover h-64 md:h-80"
+              />
+              <img
+                src="/images/gambar-rak-kanan-oke.webp"
+                alt="Rak Produk Kanan Tokita"
                 className="rounded-xl shadow-lg w-full max-w-md object-cover h-64 md:h-80"
               />
             </div>
