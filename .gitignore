@@ -29,17 +29,21 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.local  
+.env.example
+
+
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
 
 # cloudflare
 .wrangler
-wrangler.toml
+
 
 # old files
 index.html
@@ -53,3 +57,12 @@ _headers
 _routes.json
 tailwind.config.js
 commit.txt
+
+
+# file sementara
+pesan-error.txt
+google-apps-script/
+Code.gs
+DEPLOYMENT.md   
+TROUBLESHOOTING.md
+
