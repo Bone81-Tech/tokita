@@ -1,7 +1,7 @@
 import type { Product, ApiResponse } from '@/types';
 
-// Direct Google Apps Script URL
-const GAS_URL = process.env.NEXT_PUBLIC_GAS_URL || 'https://script.google.com/macros/s/AKfycbyM0UUfQ7gAy9bLv4WF0wv9QKinnHi7IQ1TAFP6m2IbxVC5zF8m441eEXy5fQKJ2z6TEw/exec';
+// Cloudflare Worker Proxy URL (mengatasi CORS)
+const GAS_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tokita-proxy.tokitamarket46.workers.dev';
 
 // Generic fetch wrapper with error handling
 async function fetchAPI<T = any>(
