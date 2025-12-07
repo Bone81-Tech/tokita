@@ -111,7 +111,7 @@ export const authAPI = {
 // ImageKit API - Direct to GAS for auth, then to ImageKit for upload
 export const imagekitAPI = {
   // Get authentication parameters from GAS
-  async getAuthParams(): Promise<{ signature: string; expire: number; token: string; publicKey?: string }> {
+  async getAuthParams(): Promise<{ signature: string; expire: number; token: string; publicKey?: string; } | { status: string; message: string; }> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
     return fetchAPI(GAS_URL, {
       method: 'POST',
