@@ -301,7 +301,7 @@ export default function DashboardPage() {
                         <label className="block text-sm font-medium text-gray-700">Harga</label>
                         <input
                           type="number"
-                          value={formData.price}
+                          value={formData.price || ''}
                           onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                           className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                           required
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                         <label className="block text-sm font-medium text-gray-700">Harga Promo</label>
                         <input
                           type="number"
-                          value={formData.promo_price}
+                          value={formData.promo_price || ''}
                           onChange={(e) => setFormData({ ...formData, promo_price: Number(e.target.value) })}
                           className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                         />

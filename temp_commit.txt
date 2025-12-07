@@ -1,3 +1,1 @@
-Fix developer login issue: update lib/auth.ts to use authAPI.verify().
-
-This commit fixes the developer dashboard login by redirecting the token verification check to the Google Apps Script backend instead of a non-existent local API route.
+Fix sticky zero in price inputs: ensure empty string is used for 0 values to prevent input sticking.
