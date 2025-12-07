@@ -1,4 +1,5 @@
 // JWT utilities for authentication
+import { authAPI } from '@/lib/api';
 const JWT_SECRET = process.env.JWT_SECRET || 'rahasia-super-aman-ganti-ini-di-prod-12345';
 
 // Base64 URL encoding
@@ -93,13 +94,7 @@ export const tokenManager = {
     if (!token) return false;
 
     try {
-      const response = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      return response.ok;
+      return await authAPI.verify(token);
     } catch {
       return false;
     }

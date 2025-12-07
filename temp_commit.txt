@@ -1,0 +1,3 @@
+Fix developer login issue: update lib/auth.ts to use authAPI.verify().
+
+This commit fixes the developer dashboard login by redirecting the token verification check to the Google Apps Script backend instead of a non-existent local API route.
