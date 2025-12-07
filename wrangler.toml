@@ -1,0 +1,9 @@
+name = "tokita-proxy"
+main = "worker.js"
+compatibility_date = "2023-11-20"
+
+account_id = "2fe902be18382f1b0ccb27f748f86fcf"
+
+routes = [
+  { pattern = "tokita-proxy.tokitamarket46.workers.dev/*", zone_id = "" }
+]
