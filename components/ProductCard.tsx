@@ -5,6 +5,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  // Debug: Check URL
+  if (process.env.NODE_ENV === 'development' || true) { // Always log for now to debug production issue
+     console.log(`Product: ${product.name}, Image URL:`, product.image);
+  }
+
   const imageUrl = product.image || 'https://placehold.co/400x300?text=No+Image';
   const displayPrice = typeof product.price === 'number'
     ? `Rp ${product.price.toLocaleString('id-ID')}`

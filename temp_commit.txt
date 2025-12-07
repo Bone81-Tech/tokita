@@ -1,1 +1,2 @@
-Fix sticky zero in price inputs: ensure empty string is used for 0 values to prevent input sticking.
+Fix missing product catalog images: refactor ProductGrid to use centralized productAPI to align with Dashboard data source.
+This fixes the issue where products added via Dashboard (New DB) were not showing in Catalog (Old DB).

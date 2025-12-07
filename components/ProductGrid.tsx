@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
+import { productAPI } from '@/lib/api';
 import type { Product } from '@/types';
 
 const CATEGORIES = [
@@ -40,19 +41,10 @@ export default function ProductGrid() {
     setError(null);
     
     try {
-      // Fetch from Google Apps Script via our API
-      const GAS_URL = 'https://script.google.com/macros/s/AKfycbyM0UUfQ7gAy9bLv4WF0wv9QKinnHi7IQ1TAFP6m2IbxVC5zF8m441eEXy5fQKJ2z6TEw/exec';
-      const response = await fetch(GAS_URL);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-
-      const data = await response.json();
-      const validProducts = (data.products || []).filter(
-        (p: Product) =>
+      const data = await productAPI.getAll();
+      const validProducts = data.filter(
+        (p) =>
           p.id &&
-          !String(p.id).toLowerCase().includes('kolom') &&
           !String(p.name).includes('Nama Produk')
       );
 
