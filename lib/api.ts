@@ -127,32 +127,59 @@ export const imagekitAPI = {
 
       
 
-          if (!authParams || ('status' in authParams && authParams.status === 'error')) {
+              if (!authParams || ('status' in authParams && authParams.status === 'error')) {
 
       
 
-            throw new Error((authParams as { message?: string })?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
+                throw new Error((authParams as { message?: string })?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
 
       
 
-          }
+              }
 
       
 
-      
+          
 
       
 
-      const formData = new FormData();
+              const successAuthParams = authParams as { signature: string; expire: number; token: string; publicKey?: string; };
 
-      formData.append('file', file);
+      
 
-      formData.append('fileName', file.name);
-    // Use key from GAS if available, otherwise fallback to env
-    formData.append('publicKey', authParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
-    formData.append('signature', authParams.signature);
-    formData.append('expire', authParams.expire.toString());
-    formData.append('token', authParams.token);
+          
+
+      
+
+              const formData = new FormData();
+
+      
+
+              formData.append('file', file);
+
+      
+
+              formData.append('fileName', file.name);
+
+      
+
+              // Use key from GAS if available, otherwise fallback to env
+
+      
+
+              formData.append('publicKey', successAuthParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
+
+      
+
+              formData.append('signature', successAuthParams.signature);
+
+      
+
+              formData.append('expire', successAuthParams.expire.toString());
+
+      
+
+              formData.append('token', successAuthParams.token);
     formData.append('useUniqueFileName', 'true');
     formData.append('folder', '/tokita_products');
 
