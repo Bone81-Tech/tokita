@@ -111,7 +111,7 @@ export const authAPI = {
 // ImageKit API - Direct to GAS for auth, then to ImageKit for upload
 export const imagekitAPI = {
   // Get authentication parameters from GAS
-  async getAuthParams(): Promise<{ signature: string; expire: number; token: string }> {
+  async getAuthParams(): Promise<{ signature: string; expire: number; token: string; publicKey?: string }> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
     return fetchAPI(GAS_URL, {
       method: 'POST',
@@ -126,7 +126,8 @@ export const imagekitAPI = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('fileName', file.name);
-    formData.append('publicKey', process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
+    // Use key from GAS if available, otherwise fallback to env
+    formData.append('publicKey', authParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
     formData.append('signature', authParams.signature);
     formData.append('expire', authParams.expire.toString());
     formData.append('token', authParams.token);
