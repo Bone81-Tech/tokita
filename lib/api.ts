@@ -119,13 +119,27 @@ export const imagekitAPI = {
     });
   },
 
-  // Upload image
-  async upload(file: File): Promise<{ url: string }> {
-    const authParams = await this.getAuthParams();
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', file.name);
+    // Upload image
+
+    async upload(file: File): Promise<{ url: string }> {
+
+      const authParams = await this.getAuthParams();
+
+      
+
+      if (!authParams || !authParams.signature) {
+
+        throw new Error(authParams?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
+
+      }
+
+      
+
+      const formData = new FormData();
+
+      formData.append('file', file);
+
+      formData.append('fileName', file.name);
     // Use key from GAS if available, otherwise fallback to env
     formData.append('publicKey', authParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
     formData.append('signature', authParams.signature);
