@@ -127,11 +127,19 @@ export const imagekitAPI = {
 
       
 
-      if (!authParams || !authParams.signature) {
+          if (!authParams || ('status' in authParams && authParams.status === 'error')) {
 
-        throw new Error(authParams?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
+      
 
-      }
+            throw new Error((authParams as { message?: string })?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
+
+      
+
+          }
+
+      
+
+      
 
       
 
