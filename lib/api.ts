@@ -49,7 +49,7 @@ async function fetchAuthAPI<T = any>(
 export const productAPI = {
   // Get all products
   async getAll(): Promise<Product[]> {
-    const data = await fetchAPI<ApiResponse>(GAS_URL);
+    const data = await fetchAPI<ApiResponse>(`${GAS_URL}?cacheBust=${new Date().getTime()}`);
     return data.products || [];
   },
 
