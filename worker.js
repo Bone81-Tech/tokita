@@ -50,6 +50,11 @@ export default {
       );
       modifiedResponse.headers.set('Access-Control-Max-Age', '86400');
 
+      // ADD THESE LINES - Prevent caching of responses
+      modifiedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      modifiedResponse.headers.set('Pragma', 'no-cache');
+      modifiedResponse.headers.set('Expires', '0');
+
       return modifiedResponse;
     } catch (error) {
       return new Response(JSON.stringify({
@@ -62,6 +67,10 @@ export default {
           'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin)
             ? origin
             : ALLOWED_ORIGINS[0],
+          // ADD THESE LINES - Prevent caching of error responses too
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
     }
@@ -76,6 +85,10 @@ function handleOptions(request, origin) {
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
+    // ADD THESE LINES - Prevent caching of preflight responses
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   };
 
   return new Response(null, {

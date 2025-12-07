@@ -5,12 +5,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  // Debug: Check URL
-  if (process.env.NODE_ENV === 'development' || true) { // Always log for now to debug production issue
-     console.log(`Product: ${product.name}, Image URL:`, product.image);
-  }
+  // Add cache-busting to image URL to ensure updated images appear
+  // ImageKit caches images for up to 1 year, so we need to force refresh when images change
+  const imageUrl = product.image ?
+    `${product.image}${product.image.includes('?') ? '&' : '?'}cb=${Date.now()}`
+    : 'https://placehold.co/400x300?text=No+Image';
 
-  const imageUrl = product.image || 'https://placehold.co/400x300?text=No+Image';
   const displayPrice = typeof product.price === 'number'
     ? `Rp ${product.price.toLocaleString('id-ID')}`
     : product.price;
@@ -31,6 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
+            // Remove cache-busting for fallback image
             target.src = 'https://placehold.co/400x300?text=Produk+Tokita';
           }}
         />
