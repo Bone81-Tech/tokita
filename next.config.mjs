@@ -2,20 +2,16 @@
 import withPWA from 'next-pwa';
 
 const nextConfig = {
-  // Static export for Cloudflare Pages with _routes.json to handle API routes
-  output: 'export',
+  // Remove static export to allow API routes to work in Cloudflare Pages
+  // Cloudflare Pages supports Next.js serverless functions properly
 
-  // Disable image optimization for static export
   images: {
-    unoptimized: true,
+    unoptimized: false, // Re-enable image optimization
   },
-
-  // Trailing slash for better Cloudflare Pages compatibility
-  trailingSlash: true,
 
   experimental: {
     serverActions: {
-      allowedOrigins: ["tokita.pages.dev", "localhost:3000", "localhost:3001"] // Allow production and dev origins
+      allowedOrigins: ["tokita.pages.dev", "localhost:3000", "localhost:3001"]
     },
   },
 };
