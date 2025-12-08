@@ -14,6 +14,44 @@ const nextConfig = {
       allowedOrigins: ["tokita.pages.dev", "localhost:3000", "localhost:3001"]
     },
   },
+
+  // Additional optimization settings
+  webpack: (config, { isServer }) => {
+    // Reduce bundle size by externalizing heavy libraries
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+
+    // Optimization for production builds
+    if (process.env.NODE_ENV === 'production') {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+              priority: 10,
+            },
+            default: {
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
+
+    return config;
+  },
 };
 
 const pwaConfig = {
