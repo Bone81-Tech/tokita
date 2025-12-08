@@ -2,7 +2,8 @@ import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import Footer from '@/components/Footer';
-import ClearSWCache from '@/components/./ClearSWCache';
+import ClearSWCache from '@/components/ClearSWCache';
+import PWAInstallButton from '@/components/PWAInstallButton';
 
 export default function Home() {
   return (
@@ -52,6 +53,7 @@ export default function Home() {
       </section>
 
       <Footer />
+      <PWAInstallButton />
     </div>
   );
 }
