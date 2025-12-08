@@ -2,14 +2,16 @@ import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import Footer from '@/components/Footer';
+import ClearSWCache from '@/components/./ClearSWCache';
 
 export default function Home() {
   return (
     <div className="bg-gray-50">
+      <ClearSWCache />
       <Navigation />
       <Hero />
       <ProductGrid />
-      
+
       {/* About Section */}
       <section id="about" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

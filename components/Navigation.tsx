@@ -1,10 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Close menu when navigating
+  useEffect(() => {
+    if (isOpen) {
+      const handleRouteChange = () => {
+        setIsOpen(false);
+      };
+
+      window.addEventListener('popstate', handleRouteChange);
+      return () => {
+        window.removeEventListener('popstate', handleRouteChange);
+      };
+    }
+  }, [isOpen]);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -40,6 +54,7 @@ export default function Navigation() {
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 p-2"
               aria-label="Toggle menu"
+              type="button"
             >
               <svg
                 className="h-6 w-6"

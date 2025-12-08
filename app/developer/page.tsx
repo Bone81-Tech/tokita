@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { tokenManager } from '@/lib/auth';
-import { authAPI } from '@/lib/api';
+import { tokenManager } from '@/lib/auth'; // Keep tokenManager for now if needed for isValid/remove
+import { supabase } from '@/lib/supabase'; // Import Supabase client
 
 export default function DeveloperPage() {
   const router = useRouter();
@@ -19,14 +19,24 @@ export default function DeveloperPage() {
     setLoading(true);
 
     try {
-      const data = await authAPI.login(username, password);
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: username, // Supabase typically uses 'email' for username
+        password: password,
+      });
 
-      if (data.status === 'success' && data.token) {
-        tokenManager.set(data.token);
-        localStorage.setItem('tokita_admin_session', 'true');
+      if (authError) {
+        setError(authError.message);
+      } else if (data.session) {
+        // Supabase automatically manages the session in localStorage
+        // You might want to store additional admin flags if needed for your app's logic
+        localStorage.setItem('tokita_admin_session', 'true'); // Keep this if you use it to check admin status
+
+        // Optionally, check user roles from Supabase if you have them configured
+        // e.g., if (data.user?.user_metadata?.role === 'admin') { ... }
+
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Login gagal');
+        setError('Login gagal. Silakan periksa kredensial Anda.');
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.');
@@ -59,16 +69,16 @@ export default function DeveloperPage() {
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Username
+                Email
               </label>
               <input
                 id="username"
-                type="text"
+                type="email" // Changed to email type for Supabase
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Enter username"
+                placeholder="Enter email"
               />
             </div>
 

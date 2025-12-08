@@ -20,36 +20,44 @@ export default function ProductGrid() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch products on mount
+  // Ensure we clear browser cache for API calls and service worker caches
   useEffect(() => {
-    fetchProducts();
+    // Clear service worker caches when component mounts
+    if ('serviceWorker' in navigator && 'caches' in window) {
+      caches.keys().then((names) => {
+        const deletePromises = names.map(name => {
+          // Delete all caches to ensure fresh data
+          return caches.delete(name);
+        });
+        Promise.all(deletePromises).then(() => {
+          console.log('All caches cleared');
+        }).catch(err => {
+          console.warn('Error clearing caches:', err);
+        });
+      });
+    }
   }, []);
 
-  // Filter products when category changes
+  // Fetch products when selectedCategory changes (or on initial mount)
   useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter((p) => p.category === selectedCategory)
-      );
-    }
-  }, [selectedCategory, products]);
+    fetchProducts(selectedCategory);
+  }, [selectedCategory]); // Dependency on selectedCategory
 
-  async function fetchProducts() {
+  async function fetchProducts(categoryToFetch: string) {
     setLoading(true);
     setError(null);
     
     try {
-      const data = await productAPI.getAll();
-      const validProducts = data.filter(
-        (p) =>
-          p.id &&
-          !String(p.name).includes('Nama Produk')
-      );
+      let fetchedProducts: Product[] = [];
+      if (categoryToFetch === 'all') {
+        fetchedProducts = await productAPI.getAll();
+      } else {
+        fetchedProducts = await productAPI.getByCategory(categoryToFetch);
+      }
 
-      setProducts(validProducts);
-      setFilteredProducts(validProducts);
+      // No longer filtering 'Nama Produk' as data is from Supabase
+      setProducts(fetchedProducts);
+      setFilteredProducts(fetchedProducts); // Initialize filtered products with all fetched products
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load products');
       console.error('Error fetching products:', err);

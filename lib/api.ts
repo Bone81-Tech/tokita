@@ -1,197 +1,175 @@
+// lib/api.ts (Supabase Integration)
+
+import { supabase } from './supabase';
 import type { Product, ApiResponse } from '@/types';
+import { User } from '@supabase/supabase-js'; // Import User type
 
-// Cloudflare Worker Proxy URL (mengatasi CORS)
-const GAS_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tokita-proxy.tokitamarket46.workers.dev';
+// Helper to check if a user is authenticated
+async function isAuthenticated(): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  return !!user;
+}
 
-// Generic fetch wrapper with error handling
-async function fetchAPI<T = any>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  try {
-    const response = await fetch(endpoint, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+// Helper to get authenticated user (if needed for admin checks later)
+// This can be used to check user roles if you add them to user_metadata or a profile table
+async function getAuthenticatedUser(): Promise<User | null> {
+  const { data: { user } = { user: null } } = await supabase.auth.getUser();
+  return user;
+}
+
+
+// This file will be refactored to use Supabase client directly
+// Product API will interact with Supabase tables
+export const productAPI = {
+  // Example for getting all products
+  async getAll(): Promise<Product[]> {
+    const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
+    if (error) {
+      console.error('Error fetching products:', error.message);
+      throw new Error('Failed to load products');
+    }
+    return data || [];
+  },
+
+  // Example for getting products by category
+  async getByCategory(category: string): Promise<Product[]> {
+    const { data, error } = await supabase.from('products').select('*').eq('category', category).order('id', { ascending: true });
+    if (error) {
+      console.error(`Error fetching products by category ${category}:`, error.message);
+      throw new Error('Failed to load products by category');
+    }
+    return data || [];
+  },
+
+  async create(product: Partial<Product>): Promise<ApiResponse> {
+    if (!await isAuthenticated()) {
+      return { status: 'error', message: 'Unauthorized. Please log in.' };
+    }
+
+    const newProduct = {
+      ...product,
+      id: product.id || 'PRD' + Date.now(), // Generate ID if not provided, consistent with old GAS
+    };
+
+    const { error } = await supabase.from('products').insert([newProduct]);
+    if (error) {
+      console.error('Error creating product:', error.message);
+      return { status: 'error', message: error.message };
+    }
+    return { status: 'success', message: 'Product created successfully.' };
+  },
+
+  async update(product: Product): Promise<ApiResponse> {
+    if (!await isAuthenticated()) {
+      return { status: 'error', message: 'Unauthorized. Please log in.' };
+    }
+    if (!product.id) {
+      return { status: 'error', message: 'Product ID is required for update.' };
+    }
+
+    const { error } = await supabase.from('products').update(product).eq('id', product.id);
+    if (error) {
+      console.error(`Error updating product ${product.id}:`, error.message);
+      return { status: 'error', message: error.message };
+    }
+    return { status: 'success', message: 'Product updated successfully.' };
+  },
+
+  async delete(id: string): Promise<ApiResponse> {
+    if (!await isAuthenticated()) {
+      return { status: 'error', message: 'Unauthorized. Please log in.' };
+    }
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      console.error(`Error deleting product ${id}:`, error.message);
+      return { status: 'error', message: error.message };
+    }
+    return { status: 'success', message: 'Product deleted successfully.' };
+  },
+};
+
+// ImageKit API - Now integrated with Next.js API Route for auth
+export const imagekitAPI = {
+  async getAuthParams(): Promise<{ signature: string; expire: number; token: string; publicKey?: string; } | { status: string; message: string; }> {
+    // Get the current session to extract access token
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      throw new Error('No active session found. Please log in again.');
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`, // Include the access token
+    };
+
+    const response = await fetch('/api/imagekit-auth', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({}), // No need for credentials since we're using headers
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      console.error('ImageKit auth error response:', errorData);
+      throw new Error(errorData.message || 'Failed to get ImageKit auth params');
     }
 
-    return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-}
-
-// Authenticated fetch wrapper
-async function fetchAuthAPI<T = any>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
-  
-  // For GAS, we send token in body instead of headers
-  const body = options?.body ? JSON.parse(options.body as string) : {};
-  body.token = token;
-  
-  return fetchAPI<T>(endpoint, {
-    ...options,
-    body: JSON.stringify(body),
-  });
-}
-
-// Product API
-export const productAPI = {
-  // Get all products
-  async getAll(): Promise<Product[]> {
-    const data = await fetchAPI<ApiResponse>(`${GAS_URL}?cacheBust=${new Date().getTime()}`);
-    return data.products || [];
+    const result = await response.json();
+    console.log('Successfully retrieved ImageKit auth params:', result);
+    return result;
   },
 
-  // Get products by category
-  async getByCategory(category: string): Promise<Product[]> {
-    const data = await fetchAPI<ApiResponse>(`${GAS_URL}?category=${category}`);
-    return data.products || [];
-  },
+  async upload(file: File): Promise<{ url: string }> {
+    console.log('Starting image upload for file:', file.name);
 
-  // Create product (authenticated)
-  async create(product: Partial<Product>): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'create_product', data: product }),
-    });
-  },
+    const authParams = await this.getAuthParams();
 
-  // Update product (authenticated)
-  async update(product: Product): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'update_product', data: product }),
-    });
-  },
-
-  // Delete product (authenticated)
-  async delete(id: string): Promise<ApiResponse> {
-    return fetchAuthAPI<ApiResponse>(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'delete_product', id }),
-    });
-  },
-};
-
-// Auth API - Direct to GAS
-export const authAPI = {
-  // Login
-  async login(username: string, password: string): Promise<{ status: string; token?: string; message?: string }> {
-    return fetchAPI(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'login', username, password }),
-    });
-  },
-
-  // Verify token
-  async verify(token: string): Promise<boolean> {
-    try {
-      const response = await fetchAPI(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'verify', token }),
-      });
-      return response.status === 'success';
-    } catch {
-      return false;
+    if (!authParams || ('status' in authParams && authParams.status === 'error')) {
+      console.error('Failed to get auth params for upload:', authParams);
+      throw new Error((authParams as { message?: string })?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
     }
-  },
-};
 
-// ImageKit API - Direct to GAS for auth, then to ImageKit for upload
-export const imagekitAPI = {
-  // Get authentication parameters from GAS
-  async getAuthParams(): Promise<{ signature: string; expire: number; token: string; publicKey?: string; } | { status: string; message: string; }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('tokita_token') : null;
-    return fetchAPI(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'imagekit_auth', token }),
-    });
-  },
+    const successAuthParams = authParams as { signature: string; expire: number; token: string; publicKey?: string; };
 
-    // Upload image
-
-    async upload(file: File): Promise<{ url: string }> {
-
-      const authParams = await this.getAuthParams();
-
-      
-
-              if (!authParams || ('status' in authParams && authParams.status === 'error')) {
-
-      
-
-                throw new Error((authParams as { message?: string })?.message || 'Gagal mendapatkan otentikasi upload. Sesi Anda mungkin telah berakhir, silakan login kembali.');
-
-      
-
-              }
-
-      
-
-          
-
-      
-
-              const successAuthParams = authParams as { signature: string; expire: number; token: string; publicKey?: string; };
-
-      
-
-          
-
-      
-
-              const formData = new FormData();
-
-      
-
-              formData.append('file', file);
-
-      
-
-              formData.append('fileName', file.name);
-
-      
-
-              // Use key from GAS if available, otherwise fallback to env
-
-      
-
-              formData.append('publicKey', successAuthParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
-
-      
-
-              formData.append('signature', successAuthParams.signature);
-
-      
-
-              formData.append('expire', successAuthParams.expire.toString());
-
-      
-
-              formData.append('token', successAuthParams.token);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileName', file.name);
+    formData.append('publicKey', successAuthParams.publicKey || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '');
+    formData.append('signature', successAuthParams.signature);
+    formData.append('expire', successAuthParams.expire.toString());
+    formData.append('token', successAuthParams.token);
     formData.append('useUniqueFileName', 'true');
     formData.append('folder', '/tokita_products');
 
-    const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+    // Ensure we use the correct ImageKit upload endpoint.
+    // This should ideally be a constant from an env var.
+    const uploadUrl = process.env.NEXT_PUBLIC_IMAGEKIT_UPLOAD_URL || 'https://upload.imagekit.io/api/v1/files/upload';
+
+    console.log('Sending upload request to ImageKit with params:', {
+      fileName: file.name,
+      folder: '/tokita_products',
+      publicKey: successAuthParams.publicKey
+    });
+
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
     });
 
+    if (!response.ok) {
+      const errorResult = await response.text(); // ImageKit might return text instead of JSON on error
+      console.error('ImageKit upload failed with response:', errorResult);
+      throw new Error(`Upload failed: ${errorResult}`);
+    }
+
     const result = await response.json();
-    
+    console.log('Upload response from ImageKit:', result);
+
     if (!result.url) {
-      throw new Error(result.message || 'Upload failed');
+      console.error('No URL returned from ImageKit upload:', result);
+      throw new Error(result.message || 'Upload failed - no URL returned');
     }
 
     return { url: result.url };

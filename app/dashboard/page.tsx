@@ -44,7 +44,7 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const data = await productAPI.getAll();
-      setProducts(data.filter(p => p.id && !String(p.name).includes('Nama Produk')));
+      setProducts(data);
     } catch (error) {
       showNotification('Gagal memuat produk', 'error');
       console.error(error);
@@ -126,7 +126,7 @@ export default function DashboardPage() {
   }
 
   function handleLogout() {
-    tokenManager.remove();
+    tokenManager.removeSession();
     router.push('/developer');
   }
 
