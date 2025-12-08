@@ -2,7 +2,7 @@
 import withPWA from 'next-pwa';
 
 const nextConfig = {
-  // Static export for Cloudflare Pages
+  // Static export for Cloudflare Pages with _routes.json to handle API routes
   output: 'export',
 
   // Disable image optimization for static export
@@ -12,6 +12,10 @@ const nextConfig = {
 
   // Trailing slash for better Cloudflare Pages compatibility
   trailingSlash: true,
+
+  experimental: {
+    serverActions: true,
+  },
 };
 
 const pwaConfig = {
