@@ -1,6 +1,5 @@
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
-import ProductGrid from '@/components/ProductGrid';
 import Footer from '@/components/Footer';
 import ClearSWCache from '@/components/ClearSWCache';
 import PWAInstallButton from '@/components/PWAInstallButton';
@@ -11,7 +10,6 @@ export default function Home() {
       <ClearSWCache />
       <Navigation />
       <Hero />
-      <ProductGrid />
 
       {/* About Section */}
       <section id="about" className="py-16 bg-gray-50">

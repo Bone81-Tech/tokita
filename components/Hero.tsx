@@ -22,7 +22,7 @@ export default function Hero() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href="#products"
+              href="/products"
               className="bg-yellow-400 text-indigo-900 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-300 transition-transform transform hover:-translate-y-1"
             >
               Lihat Katalog
