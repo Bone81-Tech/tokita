@@ -1,8 +1,0 @@
-name = "tokita-proxy"
-main = "worker.js"
-compatibility_date = "2023-11-20"
-
-account_id = "2fe902be18382f1b0ccb27f748f86fcf"
-
-# Enable deployment to the .workers.dev subdomain
-workers_dev = true

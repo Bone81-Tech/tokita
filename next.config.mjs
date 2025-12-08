@@ -14,7 +14,9 @@ const nextConfig = {
   trailingSlash: true,
 
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ["tokita.pages.dev", "localhost:3000", "localhost:3001"] // Allow production and dev origins
+    },
   },
 };
 
