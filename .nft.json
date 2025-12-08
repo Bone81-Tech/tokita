@@ -1,0 +1,16 @@
+{
+  "includedFiles": [
+    "package.json",
+    "public/**/*",
+    "app/**/*",
+    "components/**/*",
+    "lib/**/*",
+    "types/**/*",
+    "next.config.mjs",
+    "postcss.config.js",
+    "tailwind.config.ts"
+  ],
+  "excludedFiles": [
+    "node_modules/googleapis/**/*"
+  ]
+}
