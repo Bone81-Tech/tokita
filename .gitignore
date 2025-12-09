@@ -125,14 +125,12 @@ npm-debug.log*
 *.tsbuildinfo
 .next/types/**/*.ts
 
-# Old files that should not be tracked
-index.html
+# Exclude old development files but keep current production files
+# Current production files (index.html, products.html, etc.) should NOT be in this list
 dashboard.html
 developer.html
 index-standalone.html
 functions/
-js/
-src/
 _headers
 _routes.json
 commit.txt
@@ -145,3 +143,10 @@ DEPLOYMENT.md
 TROUBLESHOOTING.md
 script.sql
 
+# Worker development files (if any)
+worker/node_modules/
+worker/.wrangler/
+
+# IDE and editor files
+.vscode/settings.json
+.idea/workspace.xml

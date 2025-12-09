@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Produk TOKITA - Belanja Hemat & Lengkap</title>
+  <meta name="description" content="Katalog Produk TOKITA - Temukan berbagai kebutuhan pokok, sembako, dan jajanan hemat di sini.">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" href="favicon.ico">
+
+  <!-- Inter Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-gray-50 min-h-screen">
+    <!-- Clear SW Cache Script -->
+    <script src="js/sw-cleanup.js"></script>
+    
+    <!-- Navigation Component -->
+    <div id="navigation-placeholder"></div>
+    
+    <div class="py-8">
+      <!-- Product Grid Placeholder -->
+      <div id="product-grid-placeholder"></div>
+    </div>
+
+    <!-- Footer Component -->
+    <div id="footer-placeholder"></div>
+    
+    <!-- PWA Install Button -->
+    <div id="pwa-install-button"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api-proxy.js"></script> <!-- Updated to use Cloudflare Worker proxy -->
+  <script src="js/utils.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/footer.js"></script>
+  <script src="js/product-grid.js"></script>
+  <script src="js/product-card.js"></script>
+  <script src="js/pwa-install.js"></script>
+  <script>
+    // Initialize all components when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load components
+      loadNavigation();
+      loadFooter();
+      loadProductGrid();
+      loadPWAInstallButton();
+    });
+  </script>
+</body>
+</html>

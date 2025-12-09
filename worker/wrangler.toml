@@ -1,0 +1,13 @@
+name = "tokita-api-proxy"
+main = "index.js"
+compatibility_date = "2025-12-09"
+
+[vars]
+# Ini hanya placeholder, nilai sebenarnya akan diatur di Cloudflare Dashboard
+SUPABASE_URL = "https://your-project.supabase.co"
+SUPABASE_ANON_KEY = "your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
+IMAGEKIT_PUBLIC_KEY = "your-imagekit-public-key"
+IMAGEKIT_PRIVATE_KEY = "your-imagekit-private-key"
+
+# Untuk development, Anda juga bisa menggunakan .dev.vars file
