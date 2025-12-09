@@ -5,6 +5,10 @@ compatibility_date = "2025-12-09"
 # Aktifkan workers.dev untuk mendapatkan URL development
 workers_dev = true
 
+routes = [
+  { pattern = "tokita-api-proxy.tokitamarket46.workers.dev", custom_domain = true }
+]
+
 [vars]
 # Ini hanya placeholder, nilai sebenarnya akan diatur di Cloudflare Dashboard
 SUPABASE_URL = "https://your-project.supabase.co"
