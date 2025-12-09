@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'; // Import Supabase client
 
 export default function DeveloperPage() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -17,18 +18,16 @@ export default function DeveloperPage() {
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithOtp({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: email,
-        options: {
-          // This will redirect the user to the dashboard after they click the magic link
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
+        password: password,
       });
 
       if (authError) {
         setError(authError.message);
       } else {
-        setSuccess('Link login telah dikirim! Silakan periksa email Anda.');
+        setSuccess('Login berhasil! Anda akan dialihkan.');
+        // Redirect will happen via auth listener in layout.tsx or similar
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.');
@@ -51,7 +50,7 @@ export default function DeveloperPage() {
 
           {success ? (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-center">
-              <p className="font-semibold">Cek Email Anda</p>
+
               <p>{success}</p>
             </div>
           ) : (
@@ -76,8 +75,35 @@ export default function DeveloperPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Enter your admin email"
+                  placeholder="Masukkan email Anda"
                 />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Kata Sandi
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Masukkan kata sandi Anda"
+                />
+              </div>
+
+              <div className="text-right">
+                <Link
+                  href="/auth/reset-password"
+                  className="text-sm text-indigo-600 hover:text-indigo-700"
+                >
+                  Lupa Kata Sandi?
+                </Link>
               </div>
 
               <button
@@ -85,19 +111,10 @@ export default function DeveloperPage() {
                 disabled={loading}
                 className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Mengirim...' : 'Kirim Magic Link'}
+                {loading ? 'Masuk...' : 'Login'}
               </button>
             </form>
           )}
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/"
-              className="text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              ← Back to Website
-            </Link>
-          </div>
         </div>
       </div>
     </div>
