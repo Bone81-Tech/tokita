@@ -23,7 +23,43 @@ export default {
     const supabaseAnonKey = env.SUPABASE_ANON_KEY || SUPABASE_ANON_KEY;
     const supabaseServiceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY;
 
+    // Log untuk debugging (ini akan muncul di Cloudflare Logs)
+    console.log('Request to:', path, 'from origin:', request.headers.get('Origin'));
+    console.log('Configured Supabase URL:', supabaseUrl ? 'Yes' : 'No');
+    console.log('Configured Supabase Service Role Key:', supabaseServiceRoleKey ? 'Yes (partial)' : 'No');
+    if (supabaseServiceRoleKey) {
+      console.log('Service Role Key starts with:', supabaseServiceRoleKey.substring(0, 10));
+    }
+
     try {
+      // Validasi konfigurasi Supabase yang diperlukan
+      if (!supabaseUrl || !supabaseServiceRoleKey) {
+        const errorResponse = new Response(JSON.stringify({
+          error: 'Missing required configuration',
+          details: 'Supabase URL or Service Role Key not configured'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const origin = request.headers.get('Origin') || '*';
+        return addCORSHeaders(errorResponse, origin);
+      }
+
+      // Validasi format URL Supabase
+      try {
+        new URL(supabaseUrl);
+      } catch (urlError) {
+        const errorResponse = new Response(JSON.stringify({
+          error: 'Invalid Supabase URL configuration',
+          details: 'Supabase URL format is not valid'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const origin = request.headers.get('Origin') || '*';
+        return addCORSHeaders(errorResponse, origin);
+      }
+
       let response;
 
       // Endpoint untuk produk
@@ -100,8 +136,61 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
       body: method !== 'GET' && method !== 'DELETE' ? await request.text() : undefined
     });
 
-    const response = await fetch(supabaseRequest);
-    const data = await response.json();
+    let response;
+    try {
+      response = await fetch(supabaseRequest);
+    } catch (fetchError) {
+      console.error('Fetch error to Supabase:', fetchError);
+      return new Response(JSON.stringify({
+        error: 'Connection error to Supabase',
+        details: `Could not reach Supabase: ${fetchError.message}`
+      }), {
+        status: 502, // Bad Gateway
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Cek apakah response OK sebelum parsing JSON
+    if (!response.ok) {
+      // Baca response sebagai text dulu untuk mengetahui error sebenarnya
+      let errorBody;
+      try {
+        errorBody = await response.text();
+        // Coba parse sebagai JSON jika mungkin
+        const errorJson = JSON.parse(errorBody);
+        return new Response(JSON.stringify({
+          error: 'Error processing products request',
+          details: errorJson
+        }), {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch {
+        // Jika bukan JSON, kembalikan sebagai string error
+        return new Response(JSON.stringify({
+          error: 'Error processing products request',
+          details: `Non-JSON error response: ${errorBody}`
+        }), {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Jika response OK, parsing JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      return new Response(JSON.stringify({
+        error: 'Invalid response from Supabase',
+        details: 'Response from Supabase is not valid JSON'
+      }), {
+        status: 502, // Bad Gateway
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     return new Response(JSON.stringify(data), {
       status: response.status,
@@ -111,7 +200,11 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
     });
   } catch (error) {
     console.error('Error in handleProducts:', error);
-    return new Response(JSON.stringify({ error: 'Error processing products request', details: error.message }), {
+    // Tangani error dengan benar dan kembalikan JSON yang valid
+    return new Response(JSON.stringify({
+      error: 'Error processing products request',
+      details: error.message
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -136,8 +229,61 @@ async function handleAuth(request, method, url, supabaseUrl, supabaseAnonKey) {
       body: method !== 'GET' ? await request.text() : undefined
     });
 
-    const response = await fetch(supabaseRequest);
-    const data = await response.json();
+    let response;
+    try {
+      response = await fetch(supabaseRequest);
+    } catch (fetchError) {
+      console.error('Fetch error to Supabase Auth:', fetchError);
+      return new Response(JSON.stringify({
+        error: 'Connection error to Supabase Auth',
+        details: `Could not reach Supabase Auth: ${fetchError.message}`
+      }), {
+        status: 502, // Bad Gateway
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Cek apakah response OK sebelum parsing JSON
+    if (!response.ok) {
+      // Baca response sebagai text dulu untuk mengetahui error sebenarnya
+      let errorBody;
+      try {
+        errorBody = await response.text();
+        // Coba parse sebagai JSON jika mungkin
+        const errorJson = JSON.parse(errorBody);
+        return new Response(JSON.stringify({
+          error: 'Error processing auth request',
+          details: errorJson
+        }), {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch {
+        // Jika bukan JSON, kembalikan sebagai string error
+        return new Response(JSON.stringify({
+          error: 'Error processing auth request',
+          details: `Non-JSON error response: ${errorBody}`
+        }), {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Jika response OK, parsing JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error in auth:', jsonError);
+      return new Response(JSON.stringify({
+        error: 'Invalid response from Supabase Auth',
+        details: 'Response from Supabase Auth is not valid JSON'
+      }), {
+        status: 502, // Bad Gateway
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     return new Response(JSON.stringify(data), {
       status: response.status,
@@ -147,7 +293,10 @@ async function handleAuth(request, method, url, supabaseUrl, supabaseAnonKey) {
     });
   } catch (error) {
     console.error('Error in handleAuth:', error);
-    return new Response(JSON.stringify({ error: 'Error processing auth request', details: error.message }), {
+    return new Response(JSON.stringify({
+      error: 'Error processing auth request',
+      details: error.message
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -184,6 +333,33 @@ async function handleImageKit(request, method, url, env) {
         body: imagekitFormData
       });
 
+      // Cek apakah response OK sebelum parsing JSON
+      if (!imagekitResponse.ok) {
+        // Baca response sebagai text dulu untuk mengetahui error sebenarnya
+        let errorBody;
+        try {
+          errorBody = await imagekitResponse.text();
+          // Coba parse sebagai JSON jika mungkin
+          const errorJson = JSON.parse(errorBody);
+          return new Response(JSON.stringify({
+            error: 'Error uploading to ImageKit',
+            details: errorJson
+          }), {
+            status: imagekitResponse.status,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        } catch {
+          // Jika bukan JSON, kembalikan sebagai string error
+          return new Response(JSON.stringify({
+            error: 'Error uploading to ImageKit',
+            details: `Non-JSON error response: ${errorBody}`
+          }), {
+            status: imagekitResponse.status,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
       const result = await imagekitResponse.json();
       return new Response(JSON.stringify(result), {
         status: imagekitResponse.status,
@@ -194,7 +370,10 @@ async function handleImageKit(request, method, url, env) {
     return new Response('Not Found', { status: 404 });
   } catch (error) {
     console.error('Error in handleImageKit:', error);
-    return new Response(JSON.stringify({ error: 'Error processing imagekit request', details: error.message }), {
+    return new Response(JSON.stringify({
+      error: 'Error processing imagekit request',
+      details: error.message
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
