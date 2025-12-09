@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { tokenManager } from '@/lib/auth';
+import { supabase } from '@/lib/supabase'; // Import supabase client
 import { productAPI, imagekitAPI } from '@/lib/api';
 import type { Product } from '@/types';
 
@@ -15,7 +15,7 @@ interface ImageKitAuthResponse {
 export default function DashboardPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Will be used for auth check now
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [submitting, setSubmitting] = useState(false);
@@ -39,22 +39,40 @@ export default function DashboardPage() {
   }, []);
 
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
     try {
       const data = await productAPI.getAll();
       setProducts(data);
     } catch (error) {
       showNotification('Gagal memuat produk', 'error');
       console.error(error);
-    } finally {
-      setLoading(false);
     }
-  }, [setLoading, setProducts, showNotification]);
+  }, [showNotification]);
 
-  const handleLogout = useCallback(() => {
-    tokenManager.removeSession();
-    router.push('/developer');
-  }, [router]);
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut();
+    // No need to push, onAuthStateChange will handle the redirect
+  }, []);
+
+  // Modern auth check with Supabase
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        // User is signed in.
+        if (loading) { // Only fetch products on initial sign-in
+          fetchProducts();
+          setLoading(false);
+        }
+      } else {
+        // User is signed out.
+        setLoading(false);
+        router.push('/developer');
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [router, fetchProducts, loading]);
 
   const handleDelete = useCallback(async (product: Product) => {
     if (!window.confirm(`Anda yakin ingin menghapus produk "${product.name}"?`)) {
@@ -187,17 +205,18 @@ export default function DashboardPage() {
     }
   }, []);
 
-  useEffect(() => {
-    async function checkAuth() {
-      const isValid = await tokenManager.isValid();
-      if (!isValid) {
-        router.push('/developer');
-        return;
-      }
-      fetchProducts(); // Call the memoized fetchProducts
-    }
-    checkAuth();
-  }, [router, fetchProducts]);
+  if (loading) {
+    return (
+      <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <svg className="mx-auto h-12 w-12 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.75V6.25m0 11.5v1.5M4.75 12H6.25m11.5 0h1.5M7.05 7.05l1.06 1.06M15.89 15.89l1.06 1.06M7.05 16.95l1.06-1.06M15.89 8.11l1.06-1.06" />
+          </svg>
+          <div className="mt-4">Memverifikasi sesi...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -252,7 +271,7 @@ export default function DashboardPage() {
 
         {/* Product Table */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          {loading ? (
+          {products.length === 0 ? (
             <div className="p-8 text-center text-gray-500">Memuat data produk...</div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
