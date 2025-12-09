@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import withPWA from 'next-pwa';
+// import withPWA from 'next-pwa';
 
 const nextConfig = {
   // Remove static export to allow API routes to work in Cloudflare Pages
@@ -133,4 +133,4 @@ const pwaConfig = {
   // },
 };
 
-export default withPWA(pwaConfig)(nextConfig);
+export default nextConfig;
