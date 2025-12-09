@@ -2,6 +2,9 @@ name = "tokita-api-proxy"
 main = "index.js"
 compatibility_date = "2025-12-09"
 
+# Aktifkan workers.dev untuk mendapatkan URL development
+workers_dev = true
+
 [vars]
 # Ini hanya placeholder, nilai sebenarnya akan diatur di Cloudflare Dashboard
 SUPABASE_URL = "https://your-project.supabase.co"
