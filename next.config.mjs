@@ -110,6 +110,27 @@ const pwaConfig = {
     },
     // Add other custom caching rules here
   ],
+  // Exclude unnecessary workbox modules that increase bundle size
+  // The 'webpack' property here was causing an error as it's not a valid option
+  // for the GenerateSW plugin. Custom webpack configurations for next-pwa
+  // should ideally be handled at the top-level nextConfig's webpack function.
+  // The goal of excluding 'workbox-google-analytics' might need a different approach
+  // if it's still desired.
+  // webpack: (config) => {
+  //   // This modifies the existing next-pwa webpack configuration
+  //   // to exclude unnecessary workbox modules
+  //   config.plugins = config.plugins || [];
+
+  //   // Add plugin to ignore google analytics workbox module
+  //   const { IgnorePlugin } = require('webpack');
+  //   config.plugins.push(
+  //     new IgnorePlugin({
+  //       resourceRegExp: /workbox-google-analytics/,
+  //     })
+  //   );
+
+  //   return config;
+  // },
 };
 
 export default withPWA(pwaConfig)(nextConfig);

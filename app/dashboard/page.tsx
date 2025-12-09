@@ -1,10 +1,16 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { tokenManager } from '@/lib/auth';
 import { productAPI, imagekitAPI } from '@/lib/api';
 import type { Product } from '@/types';
+
+interface ImageKitAuthResponse {
+  token: string;
+  expire: number;
+  signature: string;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,20 +33,12 @@ export default function DashboardPage() {
     rating: '5.0',
   });
 
-  useEffect(() => {
-    checkAuth();
+  const showNotification = useCallback((message: string, type: 'success' | 'error') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
   }, []);
 
-  async function checkAuth() {
-    const isValid = await tokenManager.isValid();
-    if (!isValid) {
-      router.push('/developer');
-      return;
-    }
-    fetchProducts();
-  }
-
-  async function fetchProducts() {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const data = await productAPI.getAll();
@@ -51,12 +49,130 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [setLoading, setProducts, showNotification]);
 
-  function openModal(mode: 'create' | 'edit', product?: Product) {
+  const handleLogout = useCallback(() => {
+    tokenManager.removeSession();
+    router.push('/developer');
+  }, [router]);
+
+  const handleDelete = useCallback(async (product: Product) => {
+    if (!window.confirm(`Anda yakin ingin menghapus produk "${product.name}"?`)) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await productAPI.delete(product.id);
+      setProducts((prevProducts) => prevProducts.filter((p) => p.id !== product.id));
+      showNotification('Produk berhasil dihapus!', 'success');
+    } catch (error) {
+      showNotification('Gagal menghapus produk.', 'error');
+      console.error('Error deleting product:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [showNotification, setProducts]);
+
+  const handleSubmit = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+      setSubmitting(true);
+
+      try {
+        if (modalMode === 'create') {
+          const apiResponse = await productAPI.create(formData as Product);
+          if (apiResponse.status === 'error') {
+            throw new Error(apiResponse.message);
+          }
+          showNotification('Produk berhasil ditambahkan!', 'success');
+        } else {
+          // Assuming formData.id exists for edit mode
+          const apiResponse = await productAPI.update(formData as Product);
+          if (apiResponse.status === 'error') {
+            throw new Error(apiResponse.message);
+          }
+          showNotification('Produk berhasil diperbarui!', 'success');
+        }
+        await fetchProducts(); // Refetch all products to update the list
+        setIsModalOpen(false);
+        setFormData({
+          id: '',
+          name: '',
+          description: '',
+          price: 0,
+          promo_price: 0,
+          category: 'sembako',
+          image: '',
+          rating: '5.0',
+        });
+      } catch (error: any) {
+        showNotification(`Gagal ${modalMode === 'create' ? 'menambahkan' : 'memperbarui'} produk. ${error.message}`, 'error');
+        console.error(`Error ${modalMode === 'create' ? 'creating' : 'updating'} product:`, error);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [formData, modalMode, fetchProducts, showNotification]
+  );
+
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploading(true);
+      try {
+        // 1. Get authentication parameters from your API
+        const authResponse = await imagekitAPI.getAuthParams();
+
+        if ('status' in authResponse && authResponse.status === 'error') {
+          throw new Error(authResponse.message);
+        }
+
+        const successAuthResponse = authResponse as { token: string; expire: number; signature: string; publicKey?: string; };
+        const { token, expire, signature, publicKey } = successAuthResponse;
+
+        // 2. Create FormData for direct upload to ImageKit
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('fileName', file.name);
+        formData.append('token', token);
+        formData.append('expire', String(expire));
+        formData.append('signature', signature);
+        if (publicKey) {
+          formData.append('publicKey', publicKey);
+        }
+
+        // 3. Upload to ImageKit
+        const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Gagal mengupload gambar ke ImageKit');
+        }
+
+        const result = await response.json();
+        setFormData((prev) => ({ ...prev, image: result.url }));
+        showNotification('Gambar berhasil diupload!', 'success');
+      } catch (error) {
+        showNotification('Gagal mengupload gambar.', 'error');
+        console.error('Error uploading image:', error);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [showNotification]
+  );
+
+  const openModal = useCallback((mode: 'create' | 'edit', product?: Product) => {
     setModalMode(mode);
+    setIsModalOpen(true);
     if (mode === 'edit' && product) {
-      setFormData({ ...product });
+      setFormData(product);
     } else {
       setFormData({
         id: '',
@@ -69,71 +185,19 @@ export default function DashboardPage() {
         rating: '5.0',
       });
     }
-    setIsModalOpen(true);
-  }
+  }, []);
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const result = await imagekitAPI.upload(file);
-      setFormData({ ...formData, image: result.url });
-      showNotification('Upload berhasil!', 'success');
-    } catch (error) {
-      showNotification('Upload gagal: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
-    } finally {
-      setUploading(false);
-      e.target.value = '';
-    }
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!formData.name || !formData.category) {
-      alert('Nama dan Kategori wajib diisi!');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      if (modalMode === 'create') {
-        await productAPI.create(formData);
-      } else {
-        await productAPI.update(formData as Product);
+  useEffect(() => {
+    async function checkAuth() {
+      const isValid = await tokenManager.isValid();
+      if (!isValid) {
+        router.push('/developer');
+        return;
       }
-      showNotification('Produk berhasil disimpan', 'success');
-      setIsModalOpen(false);
-      fetchProducts();
-    } catch (error) {
-      showNotification('Gagal menyimpan: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
-    } finally {
-      setSubmitting(false);
+      fetchProducts(); // Call the memoized fetchProducts
     }
-  }
-
-  async function handleDelete(product: Product) {
-    if (!confirm(`Hapus produk "${product.name}"?`)) return;
-
-    try {
-      await productAPI.delete(product.id);
-      showNotification('Produk berhasil dihapus', 'success');
-      fetchProducts();
-    } catch (error) {
-      showNotification('Gagal menghapus: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
-    }
-  }
-
-  function handleLogout() {
-    tokenManager.removeSession();
-    router.push('/developer');
-  }
-
-  function showNotification(message: string, type: 'success' | 'error') {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
-  }
+    checkAuth();
+  }, [router, fetchProducts]);
 
   return (
     <div className="bg-gray-100 min-h-screen">
