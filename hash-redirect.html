@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .message {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <p>Memproses verifikasi keamanan...</p>
+        <p><small>Mohon tunggu sebentar, Anda sedang dialihkan.</small></p>
+    </div>
+
+    <script>
+        // Ambil hash dari URL saat ini (misal: #access_token=...&type=recovery...)
+        const hash = window.location.hash;
+
+        // Tentukan tujuan akhir
+        const targetPage = '/reset-password.html';
+
+        if (hash) {
+            // Jika hash ada, teruskan ke halaman reset password
+            // Menggunakan 'replace' agar user tidak terjebak loop jika menekan tombol Back
+            window.location.replace(targetPage + hash);
+        } else {
+            // Jika tidak ada hash, mungkin akses langsung tanpa link email
+            // Opsional: Redirect ke login atau tampilkan pesan error
+            document.querySelector('.message').innerHTML = '<p style="color:red">Error: Token tidak ditemukan dalam URL.</p><p>Pastikan Anda mengklik tautan langsung dari email Anda.</p>';
+            console.error("No hash fragment found via hash-redirect.html");
+        }
+    </script>
+</body>
+</html>

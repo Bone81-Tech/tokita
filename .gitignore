@@ -55,6 +55,6 @@ pesan-error.txt
 script.sql
 /migrations/ # Assuming these are temporary for database fixes, not source
 .gemini/ # Gemini's internal temporary files
+commit.txt
 
 # Configuration files (you can override locally)
-js/config.js # Already present, keeping it for historical context, though it's obsolete now.
