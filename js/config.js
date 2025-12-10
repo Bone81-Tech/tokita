@@ -9,8 +9,8 @@
 
 const config = {
   // Supabase configuration
-  supabaseUrl: 'https://your-project.supabase.co', // Replace with your actual Supabase project URL
-  supabaseAnonKey: 'your-anon-key', // Replace with your actual Supabase anon key
+  supabaseUrl: 'https://asmkuckxyvakbhqkgzta.supabase.co', // Replace with your actual Supabase project URL
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzbWt1Y2t4eXZha2JocWtnenRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNDU5MzUsImV4cCI6MjA4MDcyMTkzNX0.l-yFD3N9Mmpdj6YbLjr5_QEoaWOniakPmFeNETSGoeQ', // Replace with your actual Supabase anon key
 
   // ImageKit configuration
   imagekitPublicKey: 'your-imagekit-public-key', // Replace with your ImageKit public key
