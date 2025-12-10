@@ -1,0 +1,4 @@
+# Redirect rule for Supabase password recovery
+# This redirects Supabase's default password reset path 
+# to our actual reset-password.html page.
+/auth/reset-password    /reset-password.html   301
