@@ -1,4 +1,6 @@
-// js/reset-password.js - Logic for handling password reset using the recommended onAuthStateChange pattern
+// js/reset-password.js - Logic for handling password reset
+// Final, robust version using a combination of URL hash checking and onAuthStateChange
+// to overcome known race conditions with the PASSWORD_RECOVERY event.
 
 document.addEventListener('DOMContentLoaded', () => {
   const resetForm = document.getElementById('reset-password-form');
@@ -21,24 +23,44 @@ document.addEventListener('DOMContentLoaded', () => {
     window.tokitaConfig.supabaseAnonKey
   );
 
-  let isPasswordRecoverySession = false;
+  // --- Robust Session Handling ---
+  // Check the URL hash immediately on page load for the recovery type.
+  // This helps prevent race conditions where onAuthStateChange might clear the hash
+  // before we can inspect it.
+  const isRecoveryFlow = window.location.hash.includes('type=recovery');
+  let hasHandledRecovery = false;
 
-  // --- Official Supabase pattern to handle auth events ---
-  // This listener waits for the PASSWORD_RECOVERY event which is fired
-  // when the user lands on the page from a password reset link.
+  if (isRecoveryFlow) {
+    showMessage('Sesi pemulihan password terdeteksi. Silakan masukkan password baru Anda.', 'info');
+  } else {
+    showMessage('Link tidak valid atau sudah kedaluwarsa. Harap minta link reset password yang baru.', 'error');
+    resetForm.style.display = 'none'; // Hide form if not a recovery flow
+  }
+  
+  // onAuthStateChange is still useful to confirm the session is ready.
   supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'PASSWORD_RECOVERY') {
-      isPasswordRecoverySession = true;
-      showMessage('Sesi pemulihan password terdeteksi. Silakan masukkan password baru Anda.', 'info');
+    // Log all events for debugging, as requested previously.
+    console.log('Supabase auth event:', event, session);
+
+    // We are now primarily relying on the hash check, but we can confirm with this event.
+    // The main purpose of this listener now is to let us know the Supabase client is ready.
+    if (event === "SIGNED_IN" && isRecoveryFlow && !hasHandledRecovery) {
+        console.log("Password recovery session confirmed via SIGNED_IN event.");
+        hasHandledRecovery = true; // Ensure we only log this once
+    } else if (event === "PASSWORD_RECOVERY") {
+        // This is the ideal event, but we have a fallback for when it doesn't fire.
+        console.log("Password recovery session confirmed via PASSWORD_RECOVERY event.");
+        hasHandledRecovery = true;
     }
   });
+
 
   // --- Form submission handler ---
   resetForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    // Ensure this form is only used in a valid password recovery session
-    if (!isPasswordRecoverySession) {
+    // The primary gate is now the initial hash check.
+    if (!isRecoveryFlow) {
       showMessage('Sesi tidak valid. Harap gunakan link dari email reset password Anda.', 'error');
       return;
     }
