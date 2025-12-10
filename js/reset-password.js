@@ -1,9 +1,5 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-// Ganti dengan URL dan Key proyek Anda
-const supabaseUrl = 'https://asmkuckxyvakbhqkgzta.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzbWt1Y2t4eXZha2JocWtnenRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNDU5MzUsImV4cCI6MjA4MDcyMTkzNX0.l-yFD3N9Mmpdj6YbLjr5_QEoaWOniakPmFeNETSGoeQ'
-const supabase = createClient(supabaseUrl, supabaseKey)
+// 2. PERUBAHAN KRITIS: Menggunakan objek global 'supabase'
+const supabase = supabase.createClient(window.tokitaConfig.supabaseUrl, window.tokitaConfig.supabaseAnonKey)
 
 document.addEventListener('DOMContentLoaded', function () {
     const newPasswordInput = document.getElementById('new-password');
