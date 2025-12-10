@@ -1,5 +1,5 @@
 // 2. PERUBAHAN KRITIS: Menggunakan objek global 'supabase'
-const supabase = supabase.createClient(window.tokitaConfig.supabaseUrl, window.tokitaConfig.supabaseAnonKey)
+const supabaseClient = supabase.createClient(window.tokitaConfig.supabaseUrl, window.tokitaConfig.supabaseAnonKey)
 
 document.addEventListener('DOMContentLoaded', function () {
     const newPasswordInput = document.getElementById('new-password');
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 1. DENGARKAN EVENT AUTH
     // Saat halaman dimuat, Supabase akan otomatis memakan token URL
     // dan memicu event 'PASSWORD_RECOVERY'.
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log("Status Auth Berubah:", event);
 
         if (event === "PASSWORD_RECOVERY") {
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // KUNCI UTAMA: Kita menggunakan 'updateUser', BUKAN memverifikasi token lagi.
         // Kita mengandalkan sesi yang sudah terbentuk di langkah 1.
-        const { data, error } = await supabase.auth.updateUser({
+        const { data, error } = await supabaseClient.auth.updateUser({
             password: newPassword
         });
 
