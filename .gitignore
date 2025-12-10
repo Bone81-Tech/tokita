@@ -50,12 +50,11 @@ lerna-debug.log*
 *.DS_Store # macOS
 Thumbs.db # Windows
 
-# Temporary files
-*~
-#*#
-.#*
-.fuse_hidden*
-.nfs*
+# Temporary files specific to our communication or local setup
+pesan-error.txt
+script.sql
+/migrations/ # Assuming these are temporary for database fixes, not source
+.gemini/ # Gemini's internal temporary files
 
 # Configuration files (you can override locally)
 js/config.js # Already present, keeping it for historical context, though it's obsolete now.
