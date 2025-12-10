@@ -12,25 +12,35 @@ async function handleLogin(event) {
   
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const errorMessageDiv = document.getElementById('error-message');
+  const submitButton = event.target.querySelector('button[type="submit"]');
+
+  // Clear previous errors
+  errorMessageDiv.classList.add('hidden');
+  errorMessageDiv.textContent = '';
   
   if (!email || !password) {
-    alert('Email dan password wajib diisi');
+    errorMessageDiv.textContent = 'Email dan password wajib diisi.';
+    errorMessageDiv.classList.remove('hidden');
     return;
   }
   
+  // Disable button and show loading state
+  submitButton.disabled = true;
+  submitButton.textContent = 'Memproses...';
+
   try {
-    // Attempt to login
-    const result = await window.tokitaAPI.authAPI.login({ email, password });
-    
-    if (result.status === 'success') {
-      alert('Login berhasil');
-      // Redirect to admin dashboard
-      window.location.href = 'admin.html';
-    } else {
-      alert('Login gagal: ' + result.message);
-    }
+    await window.tokitaAPI.authAPI.login({ email, password });
+    // On success, redirect to admin dashboard. The API client now throws on error,
+    // so if we get here, it means the login was successful.
+    window.location.href = 'admin.html';
   } catch (error) {
     console.error('Login error:', error);
-    alert('Login gagal: ' + error.message);
+    errorMessageDiv.textContent = error.message || 'Terjadi kesalahan saat login.';
+    errorMessageDiv.classList.remove('hidden');
+  } finally {
+    // Re-enable button
+    submitButton.disabled = false;
+    submitButton.textContent = 'Sign in';
   }
 }

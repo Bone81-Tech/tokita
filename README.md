@@ -7,13 +7,13 @@ Modern e-commerce product showcase built with vanilla HTML, CSS, and JavaScript.
 - **Vanilla HTML/CSS/JS** - Tanpa framework, ringan dan cepat
 - **Responsive Design** - Tampil optimal di semua perangkat
 - **PWA Support** - Bisa diinstal sebagai aplikasi
-- **Supabase Integration** - Backend database
+- **Supabase Integration** - Backend database dengan RLS aktif
 - **Static Deployment** - Mudah dihost di mana saja
 
 ## 📋 Prerequisites
 
 - Web server statis (untuk deployment)
-- Supabase project (untuk data produk)
+- Supabase project dengan RLS dikonfigurasi (untuk data produk)
 
 ## 🛠️ Penggunaan Lokal
 
@@ -34,8 +34,9 @@ python -m http.server 8000
 
 ## ⚙️ Konfigurasi
 
-1. Buat proyek di [Supabase](https://supabase.io)
-2. Ganti konfigurasi di `js/config.js`:
+1. Buat proyek di [Supabase](https://supabase.com)
+2. Aktifkan Row Level Security (RLS) untuk tabel `products`
+3. Ganti konfigurasi di `js/config.js`:
 
 ```javascript
 const config = {
@@ -44,14 +45,18 @@ const config = {
 };
 ```
 
-3. Pastikan tabel `products` di Supabase memiliki struktur yang sesuai
+4. Pastikan tabel `products` di Supabase memiliki struktur yang sesuai
 
 ## 📦 Deployment
 
 Frontend ini dapat dideploy ke berbagai platform karena hanya berisi file statis:
 
+### Cloudflare Pages
+Sudah dikonfigurasi dengan headers CORS yang sesuai di `_headers`.
+Kredensial Supabase dapat disimpan sebagai environment variable di Cloudflare.
+
 ### Netlify
-File `netlify.toml` sudah disertakan untuk konfigurasi otomatis.
+Frontend dapat dideploy ke Netlify dengan mudah.
 
 ### Vercel
 Secara otomatis mendeteksi proyek statis.
@@ -86,7 +91,7 @@ Pastikan folder `images/` berisi file yang benar dan path di file HTML sesuai.
 
 ### API Tidak Bekerja
 
-Pastikan konfigurasi Supabase di `js/config.js` sudah benar.
+Pastikan konfigurasi Supabase di `js/config.js` sudah benar dan RLS sudah diaktifkan.
 
 ## 📄 License
 

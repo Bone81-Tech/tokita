@@ -23,6 +23,9 @@
           Silakan login untuk mengakses dashboard
         </p>
       </div>
+      <!-- Placeholder for error messages -->
+      <div id="error-message" class="hidden text-sm text-center text-red-600 bg-red-100 p-3 rounded-md"></div>
+      
       <form class="mt-8 space-y-6" id="login-form">
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
@@ -51,8 +54,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/api-proxy.js"></script> <!-- Updated to use Cloudflare Worker proxy -->
+
+  <script src="js/api-client.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/login.js"></script>
 </body>

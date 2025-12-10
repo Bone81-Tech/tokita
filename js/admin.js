@@ -1,310 +1,230 @@
-// js/admin.js - Admin Dashboard for Tokita
+// js/admin.js - Rewritten Admin Dashboard for Tokita
 
-// Check authentication on page load
-document.addEventListener('DOMContentLoaded', async function() {
-  // Check if user is authenticated
-  const isAuthenticated = await window.tokitaAPI.authAPI.isAuthenticated();
-  
-  if (!isAuthenticated) {
-    // Redirect to login page or show error
-    alert('Anda harus login terlebih dahulu');
-    // In a real implementation, you might redirect to a login page
-    // window.location.href = 'login.html';
-    return;
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. Check authentication immediately
+  if (!window.tokitaAPI.authAPI.isAuthenticated()) {
+    // If not authenticated, redirect to login page. No alerts.
+    window.location.href = 'login.html';
+    return; // Stop further execution
   }
   
-  // Load products
+  // 2. Initial data load
   loadProducts();
   
-  // Set up form submission
+  // 3. Set up event listeners
   const productForm = document.getElementById('product-form');
   if (productForm) {
     productForm.addEventListener('submit', handleProductSubmit);
   }
   
-  // Set up logout button
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
   }
 });
 
-// Load products and display them
+/**
+ * Fetches products from the API and renders them to the list.
+ * Uses event delegation for delete buttons.
+ */
 async function loadProducts() {
-  const productList = document.getElementById('product-list');
-  if (!productList) return;
-  
+  const productListDiv = document.getElementById('product-list');
+  if (!productListDiv) return;
+
+  productListDiv.innerHTML = '<div class="text-center py-10 text-gray-500">Memuat produk...</div>';
+
   try {
     const products = await window.tokitaAPI.productAPI.getAll();
-    
+    productListDiv.innerHTML = ''; // Clear loading message
+
     if (products.length === 0) {
-      productList.innerHTML = '<div class="text-center py-10 text-gray-500">Belum ada produk</div>';
+      productListDiv.innerHTML = '<div class="text-center py-10 text-gray-500">Belum ada produk.</div>';
       return;
     }
     
-    // Create HTML for product list
-    const productsHTML = products.map(product => createProductCardHTML(product)).join('');
-    productList.innerHTML = `
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${productsHTML}
-      </div>
-    `;
-    
-    // Add event listeners to edit and delete buttons
+    const productGrid = document.createElement('div');
+    productGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+
     products.forEach(product => {
-      const editBtn = document.getElementById(`edit-btn-${product.id}`);
-      if (editBtn) {
-        editBtn.addEventListener('click', () => editProduct(product));
-      }
-      
-      const deleteBtn = document.getElementById(`delete-btn-${product.id}`);
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => deleteProduct(product.id));
+      const productCard = createProductCardElement(product);
+      productGrid.appendChild(productCard);
+    });
+
+    productListDiv.appendChild(productGrid);
+
+    // Use event delegation for delete actions
+    productListDiv.addEventListener('click', (event) => {
+      const deleteButton = event.target.closest('.delete-btn');
+      if (deleteButton) {
+        const productId = deleteButton.dataset.id;
+        if (productId) {
+          handleDelete(productId);
+        }
       }
     });
+
   } catch (error) {
     console.error('Error loading products:', error);
-    productList.innerHTML = '<div class="text-center py-10 text-red-500">Gagal memuat produk</div>';
+    productListDiv.innerHTML = `<div class="text-center py-10 text-red-500">Gagal memuat produk: ${error.message}</div>`;
   }
 }
 
-// Helper function to sanitize output for display
-function sanitizeOutput(str) {
-  if (typeof str !== 'string') return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-}
+/**
+ * Securely creates a product card DOM element instead of an HTML string.
+ * @param {object} product - The product data.
+ * @returns {HTMLElement} - The product card element.
+ */
+function createProductCardElement(product) {
+    const card = document.createElement('div');
+    card.className = 'border rounded-lg p-4 shadow-sm flex flex-col justify-between';
 
-// Create HTML for a product card using DOM methods for better security
-function createProductCardHTML(product) {
-  // Sanitize product data
-  const sanitizedName = sanitizeOutput(product.name || 'Nama Produk');
-  const sanitizedCategory = sanitizeOutput(product.category || '');
-  const sanitizedDescription = sanitizeOutput(product.description || '');
-  const sanitizedImage = product.image ? sanitizeUrlForDisplay(product.image) : '';
+    const price = `Rp ${Number(product.price || 0).toLocaleString('id-ID')}`;
+    const promo = product.promo_price ? `Rp ${Number(product.promo_price).toLocaleString('id-ID')}` : null;
 
-  const displayPrice = typeof product.price === 'number'
-    ? `Rp ${product.price.toLocaleString('id-ID')}`
-    : sanitizeOutput(String(product.price || 0));
-
-  const promoPrice = product.promo_price
-    ? typeof product.promo_price === 'number'
-      ? `Rp ${product.promo_price.toLocaleString('id-ID')}`
-      : sanitizeOutput(String(product.promo_price))
-    : null;
-
-  // Create elements using DOM methods to prevent XSS
-  const cardDiv = document.createElement('div');
-  cardDiv.className = 'border rounded-lg p-4 shadow-sm';
-
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'flex justify-between items-start';
-
-  // Left side - product info
-  const infoDiv = document.createElement('div');
-
-  const nameH3 = document.createElement('h3');
-  nameH3.className = 'font-medium text-gray-900';
-  nameH3.textContent = sanitizedName;
-
-  const categoryP = document.createElement('p');
-  categoryP.className = 'text-sm text-gray-500';
-  categoryP.textContent = sanitizedCategory;
-
-  const priceDiv = document.createElement('div');
-  priceDiv.className = 'mt-2';
-
-  const priceP = document.createElement('p');
-  priceP.className = 'text-lg font-bold text-indigo-600';
-  priceP.textContent = promoPrice || displayPrice;
-
-  priceDiv.appendChild(priceP);
-
-  if (promoPrice) {
-    const originalPriceP = document.createElement('p');
-    originalPriceP.className = 'text-sm text-gray-500 line-through';
-    originalPriceP.textContent = displayPrice;
-    priceDiv.appendChild(originalPriceP);
-  }
-
-  infoDiv.appendChild(nameH3);
-  infoDiv.appendChild(categoryP);
-  infoDiv.appendChild(priceDiv);
-
-  // Right side - action buttons
-  const actionDiv = document.createElement('div');
-  actionDiv.className = 'flex space-x-2';
-
-  const editBtn = document.createElement('button');
-  editBtn.id = `edit-btn-${product.id}`;
-  editBtn.className = 'text-indigo-600 hover:text-indigo-900 text-sm';
-  editBtn.textContent = 'Edit';
-  editBtn.onclick = () => editProduct(product);
-
-  const deleteBtn = document.createElement('button');
-  deleteBtn.id = `delete-btn-${product.id}`;
-  deleteBtn.className = 'text-red-600 hover:text-red-900 text-sm';
-  deleteBtn.textContent = 'Hapus';
-  deleteBtn.onclick = () => deleteProduct(product.id);
-
-  actionDiv.appendChild(editBtn);
-  actionDiv.appendChild(deleteBtn);
-
-  // Description
-  const descP = document.createElement('p');
-  descP.className = 'mt-2 text-sm text-gray-500 line-clamp-2';
-  descP.textContent = sanitizedDescription;
-
-  // Image if exists
-  if (sanitizedImage) {
-    const img = document.createElement('img');
-    img.src = sanitizedImage;
-    img.alt = sanitizedName;
-    img.className = 'mt-2 w-full h-32 object-cover rounded';
-    cardDiv.appendChild(img);
-  }
-
-  contentDiv.appendChild(infoDiv);
-  contentDiv.appendChild(actionDiv);
-
-  cardDiv.appendChild(contentDiv);
-  cardDiv.appendChild(descP);
-
-  return cardDiv.outerHTML;
-}
-
-// Helper function to sanitize URL for display
-function sanitizeUrlForDisplay(url) {
-  if (typeof url !== 'string') return '';
-
-  try {
-    const urlObj = new URL(url);
-    // Only allow http/https protocols
-    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
-      return '';
+    let imageHTML = '';
+    if (product.image) {
+        imageHTML = `<img src="${product.image}" alt="${product.name}" class="mb-2 w-full h-32 object-cover rounded">`;
     }
-    return urlObj.href;
-  } catch (e) {
-    // Not a valid URL, return empty string
-    return '';
-  }
+
+    card.innerHTML = `
+        <div>
+            ${imageHTML}
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-medium text-gray-900">${product.name}</h3>
+                    <p class="text-sm text-gray-500">${product.category}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button data-id="${product.id}" class="edit-btn text-indigo-600 hover:text-indigo-900 text-sm">Edit</button>
+                    <button data-id="${product.id}" class="delete-btn text-red-600 hover:text-red-900 text-sm">Hapus</button>
+                </div>
+            </div>
+            <p class="mt-2 text-sm text-gray-500 line-clamp-2">${product.description || ''}</p>
+        </div>
+        <div class="mt-2">
+            <p class="text-lg font-bold text-indigo-600">${promo || price}</p>
+            ${promo ? `<p class="text-sm text-gray-500 line-through">${price}</p>` : ''}
+        </div>
+    `;
+    return card;
 }
 
-// Handle form submission
+
+/**
+ * Handles the product form submission with proper UX for loading and feedback.
+ */
 async function handleProductSubmit(event) {
   event.preventDefault();
   
+  const form = event.target;
+  const messageDiv = document.getElementById('form-message');
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  // Clear previous message
+  messageDiv.textContent = '';
+  messageDiv.className = 'hidden';
+
+  // --- Get form data ---
   const name = document.getElementById('product-name').value;
   const description = document.getElementById('product-description').value;
   const price = parseFloat(document.getElementById('product-price').value);
   const promoPrice = document.getElementById('product-promo-price').value ? parseFloat(document.getElementById('product-promo-price').value) : null;
   const category = document.getElementById('product-category').value;
   const imageFile = document.getElementById('product-image').files[0];
-  
+
   if (!name || !price || !category) {
-    alert('Nama, harga, dan kategori wajib diisi');
+    showFormMessage('Nama, harga, dan kategori wajib diisi.', 'error');
     return;
   }
-  
-  let imageUrl = '';
-  if (imageFile) {
-    try {
-      // Upload image to ImageKit
+
+  // --- Set loading state ---
+  submitButton.disabled = true;
+  submitButton.textContent = 'Menyimpan...';
+
+  try {
+    let imageUrl = '';
+    // 1. Upload image if it exists
+    if (imageFile) {
+      showFormMessage('Mengupload gambar...', 'info');
       const uploadResult = await window.tokitaAPI.imagekitAPI.upload(imageFile);
       imageUrl = uploadResult.url;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Gagal mengupload gambar: ' + error.message);
-      return;
     }
-  }
-  
-  // Create product object
-  const product = {
-    name,
-    description,
-    price,
-    promo_price: promoPrice,
-    category,
-    image: imageUrl
-  };
-  
-  try {
-    // Submit to API
-    const result = await window.tokitaAPI.productAPI.create(product);
+
+    // 2. Create product object
+    const productData = { name, description, price, promo_price: promoPrice, category, image: imageUrl };
+
+    // 3. Submit to API
+    showFormMessage('Menyimpan produk...', 'info');
+    await window.tokitaAPI.productAPI.create(productData);
     
-    if (result.status === 'success') {
-      alert('Produk berhasil ditambahkan');
-      // Reset form
-      document.getElementById('product-form').reset();
-      // Reload products
-      loadProducts();
-    } else {
-      alert('Gagal menambahkan produk: ' + result.message);
-    }
+    // 4. On success
+    showFormMessage('Produk berhasil ditambahkan!', 'success');
+    form.reset();
+    loadProducts(); // Refresh the list
+
   } catch (error) {
-    console.error('Error creating product:', error);
-    alert('Gagal menambahkan produk: ' + error.message);
+    console.error('Error submitting product:', error);
+    showFormMessage(`Gagal: ${error.message}`, 'error');
+  } finally {
+    // --- Reset button state ---
+    submitButton.disabled = false;
+    submitButton.textContent = 'Simpan Produk';
   }
 }
 
-// Edit product (populate form with product data)
-function editProduct(product) {
-  document.getElementById('product-name').value = product.name || '';
-  document.getElementById('product-description').value = product.description || '';
-  document.getElementById('product-price').value = product.price || '';
-  document.getElementById('product-promo-price').value = product.promo_price || '';
-  document.getElementById('product-category').value = product.category || 'sembako';
-  
-  // For editing, we'll need to handle this differently
-  // This is a simplified implementation
-  alert('Fitur edit akan diimplementasikan segera');
-}
-
-// Delete product
-async function deleteProduct(productId) {
-  if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+/**
+ * Deletes a product after user confirmation.
+ * @param {string} productId - The ID of the product to delete.
+ */
+async function handleDelete(productId) {
+  // A modal would be better than confirm, but this is better than nothing.
+  if (!window.confirm('Apakah Anda yakin ingin menghapus produk ini? Ini tidak bisa dibatalkan.')) {
     return;
   }
-  
+
   try {
-    const result = await window.tokitaAPI.productAPI.delete(productId);
-    
-    if (result.status === 'success') {
-      alert('Produk berhasil dihapus');
-      // Reload products
-      loadProducts();
-    } else {
-      alert('Gagal menghapus produk: ' + result.message);
-    }
+    await window.tokitaAPI.productAPI.delete(productId);
+    // Success: reload the product list to show the change.
+    loadProducts();
   } catch (error) {
     console.error('Error deleting product:', error);
-    alert('Gagal menghapus produk: ' + error.message);
+    // On failure, inform the user non-disruptively.
+    // An on-page notification system would be ideal here.
+    alert(`Gagal menghapus produk: ${error.message}`);
   }
 }
 
-// Handle logout
+/**
+ * Logs the user out and redirects to the home page.
+ */
 async function handleLogout() {
-  if (!confirm('Apakah Anda yakin ingin logout?')) {
-    return;
-  }
-  
-  try {
-    const result = await window.tokitaAPI.authAPI.logout();
-    
-    if (result.status === 'success') {
-      // In a real implementation, you might redirect to login page
-      // window.location.href = 'login.html';
-      alert('Berhasil logout');
-    } else {
-      alert('Gagal logout: ' + result.message);
+    try {
+        await window.tokitaAPI.authAPI.logout();
+        // On successful logout, redirect to the home page.
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout failed:', error);
+        alert(`Gagal logout: ${error.message}`);
     }
-  } catch (error) {
-    console.error('Error during logout:', error);
-    alert('Gagal logout: ' + error.message);
-  }
+}
+
+/**
+* Displays a message in the form's message div.
+* @param {string} message - The message to display.
+* @param {'info'|'success'|'error'} type - The type of message.
+*/
+function showFormMessage(message, type = 'info') {
+    const messageDiv = document.getElementById('form-message');
+    messageDiv.textContent = message;
+
+    // Reset classes
+    messageDiv.className = 'text-sm p-3 rounded-md'; 
+
+    if (type === 'success') {
+        messageDiv.classList.add('bg-green-100', 'text-green-700');
+    } else if (type === 'error') {
+        messageDiv.classList.add('bg-red-100', 'text-red-700');
+    } else { // 'info'
+        messageDiv.classList.add('bg-blue-100', 'text-blue-700');
+    }
 }
