@@ -1,10 +1,11 @@
-// js/reset-password.js - Logic for handling password reset
+// js/reset-password.js - Logic for handling password reset using the recommended onAuthStateChange pattern
 
 document.addEventListener('DOMContentLoaded', () => {
   const resetForm = document.getElementById('reset-password-form');
+  const messageDiv = document.getElementById('message-div');
   
-  if (!resetForm) {
-    console.error('Reset password form not found.');
+  if (!resetForm || !messageDiv) {
+    console.error('Required form elements not found.');
     return;
   }
 
@@ -14,30 +15,47 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Initialize a separate Supabase client for this specific page
+  // Initialize a Supabase client for this page
   const supabase = window.supabase.createClient(
     window.tokitaConfig.supabaseUrl,
     window.tokitaConfig.supabaseAnonKey
   );
 
+  let isPasswordRecoverySession = false;
+
+  // --- Official Supabase pattern to handle auth events ---
+  // This listener waits for the PASSWORD_RECOVERY event which is fired
+  // when the user lands on the page from a password reset link.
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      isPasswordRecoverySession = true;
+      showMessage('Sesi pemulihan password terdeteksi. Silakan masukkan password baru Anda.', 'info');
+    }
+  });
+
+  // --- Form submission handler ---
   resetForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    // Ensure this form is only used in a valid password recovery session
+    if (!isPasswordRecoverySession) {
+      showMessage('Sesi tidak valid. Harap gunakan link dari email reset password Anda.', 'error');
+      return;
+    }
 
     const newPassword = document.getElementById('new-password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
     const submitButton = event.target.querySelector('button[type="submit"]');
 
-    // --- Basic Validation ---
+    // --- Validation ---
     if (!newPassword || !confirmPassword) {
       showMessage('Semua kolom wajib diisi.', 'error');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       showMessage('Password dan konfirmasi password tidak cocok.', 'error');
       return;
     }
-
     if (newPassword.length < 6) {
         showMessage('Password minimal harus 6 karakter.', 'error');
         return;
@@ -50,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // --- Call Supabase to update the password ---
-      // The Supabase JS library automatically handles the access_token from the URL fragment
       const { data, error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -60,20 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // --- On Success ---
-      showMessage('Password berhasil diubah! Anda sekarang bisa login dengan password baru Anda.', 'success');
-      // Hide the form and show a link to the login page
+      showMessage('Password berhasil diubah! Anda akan diarahkan ke halaman Login.', 'success');
       resetForm.style.display = 'none';
-      const loginLink = document.createElement('a');
-      loginLink.href = 'login.html';
-      loginLink.className = 'text-center block text-indigo-600 hover:text-indigo-500';
-      loginLink.textContent = 'Pergi ke Halaman Login';
-      resetForm.parentElement.appendChild(loginLink);
+      
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 3000);
 
     } catch (error) {
       console.error('Password reset error:', error);
       showMessage(error.message || 'Gagal mengatur ulang password.', 'error');
-    } finally {
-      // --- Reset button state ---
+      // Re-enable button on failure
       submitButton.disabled = false;
       submitButton.textContent = 'Simpan Password Baru';
     }
