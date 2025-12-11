@@ -16,10 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ini adalah tanda bahwa link email valid!
             // User sekarang dalam keadaan "Login Sementara".
             messageDiv.innerHTML = "<span style='color:green'>Verifikasi berhasil. Silakan masukkan password baru.</span>";
+            messageDiv.classList.remove('hidden'); // Show message
             submitBtn.disabled = false;
         } else if (event === "SIGNED_OUT") {
             // Jika user tidak login, mungkin token sudah kadaluarsa sebelum halaman dimuat
              messageDiv.innerHTML = "<span style='color:red'>Link tidak valid atau kadaluarsa.</span>";
+             messageDiv.classList.remove('hidden'); // Show message
         }
     });
 
@@ -40,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         messageDiv.innerText = "Sedang memperbarui password...";
+        messageDiv.classList.remove('hidden'); // Show message
 
         // KUNCI UTAMA: Kita menggunakan 'updateUser', BUKAN memverifikasi token lagi.
         // Kita mengandalkan sesi yang sudah terbentuk di langkah 1.
