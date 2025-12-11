@@ -46,20 +46,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // KUNCI UTAMA: Kita menggunakan 'updateUser', BUKAN memverifikasi token lagi.
         // Kita mengandalkan sesi yang sudah terbentuk di langkah 1.
-        const { data, error } = await supabaseClient.auth.updateUser({
-            password: newPassword
-        });
+        
+        messageDiv.innerText = "Sedang memvalidasi sesi...";
+        messageDiv.classList.remove('hidden');
+        submitBtn.disabled = true;
 
-        if (error) {
-            console.error("Error:", error);
-            messageDiv.innerHTML = `<span style='color:red'>Gagal: ${error.message}</span>`;
-        } else {
-            console.log("Sukses:", data);
-            messageDiv.innerHTML = "<span style='color:blue'>Password berhasil diubah! Mengalihkan...</span>";
+        try {
+            // LANGKAH DEBUGGING BARU: Periksa sesi secara eksplisit sebelum update.
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
-            setTimeout(() => {
-                window.location.href = "/login.html"; // Redirect ke halaman login
-            }, 2000);
+            if (sessionError || !session) {
+                console.error("Session Error:", sessionError);
+                console.error("Session Data:", session);
+                throw new Error("Sesi tidak valid atau tidak ditemukan. Silakan coba lagi dari link email.");
+            }
+
+            console.log("Sesi valid, mencoba update password...", session);
+            messageDiv.innerText = "Sedang memperbarui password...";
+
+            const { data, error } = await supabaseClient.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) {
+                // Jika ada error dari updateUser, lempar untuk ditangkap oleh catch block.
+                throw error;
+            }
+
+            if (data) {
+                console.log("Sukses memperbarui password:", data);
+                messageDiv.innerHTML = "<span style='color:blue'>Password berhasil diubah! Mengalihkan...</span>";
+                
+                setTimeout(() => {
+                    window.location.href = "/login.html"; // Redirect ke halaman login
+                }, 2000);
+            } else {
+                // Kasus aneh jika tidak ada data maupun error.
+                throw new Error("Proses update selesai tanpa data maupun error. Kondisi tidak terduga.");
+            }
+
+        } catch (err) {
+            console.error("Gagal dalam proses update password:", err);
+            messageDiv.innerHTML = `<span style='color:red'>Gagal: ${err.message}</span>`;
+            messageDiv.classList.remove('hidden'); // Pastikan div terlihat saat error.
+        } finally {
+            submitBtn.disabled = false;
         }
     });
 });
