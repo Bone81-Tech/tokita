@@ -1,3 +1,5 @@
+alert('SCRIPT RESET PASSWORD VERSI BARU BERHASIL DIMUAT');
+
 // 2. PERUBAHAN KRITIS: Menggunakan objek global 'supabase'
 const supabaseClient = supabase.createClient(window.tokitaConfig.supabaseUrl, window.tokitaConfig.supabaseAnonKey)
 
