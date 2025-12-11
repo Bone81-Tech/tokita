@@ -2,117 +2,159 @@
 
 // Create navigation component
 function loadNavigation() {
-  // Check if we're on the admin page by looking at the current URL
-  const isAdminPage = window.location.pathname.includes('admin.html');
-
-  let adminLogoutButton = '';
-  if (isAdminPage) {
-    adminLogoutButton = `
-      <button id="logout-btn" class="md:ml-4 btn btn-outline">
-        Logout
-      </button>
-    `;
-  }
-
   const navPlaceholder = document.getElementById('navigation-placeholder');
-
+  
   navPlaceholder.innerHTML = `
-    <nav class="navbar">
+    <nav class="bg-white shadow-md sticky top-0 z-50">
       <div class="nav-container">
         <div class="nav-content">
-          <a href="/" class="navbar-brand gap-2">
-            <img
-              src="images/LOGO.webp"
-              alt="Tokita Logo"
-              class="h-12 w-auto object-contain"
-            />
-            <span class="hidden md:block">Tokita</span>
-          </a>
-
-          <div class="hidden md:flex items-center">
-            <div class="navbar-nav">
-              <a href="/" class="navbar-link">Beranda</a>
-              <a href="products.html" class="navbar-link">Katalog</a>
-              <a href="#promo" class="navbar-link">Promo</a>
-              <a href="#about" class="navbar-link">Tentang Kami</a>
-            </div>
-
-            ${adminLogoutButton}
+          <div class="flex items-center">
+            <a href="/" class="flex-shrink-0 flex items-center gap-2">
+              <img
+                src="images/LOGO.webp"
+                alt="Tokita Logo"
+                class="h-12 w-auto object-contain"
+              />
+            </a>
           </div>
 
-          <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          <div class="hidden md:flex items-center space-x-8">
+            <a href="/" class="text-gray-700 hover:text-indigo-600 font-medium">
+              Beranda
+            </a>
+            <a href="products.html" class="text-gray-700 hover:text-indigo-600 font-medium">
+              Katalog
+            </a>
+            <a href="#promo" class="text-gray-700 hover:text-indigo-600 font-medium">
+              Promo
+            </a>
+            <a href="#about" class="text-gray-700 hover:text-indigo-600 font-medium">
+              Tentang Kami
+            </a>
+          </div>
+
+          <div class="md:hidden flex items-center">
+            <button
+              id="mobile-menu-button"
+              class="text-gray-700 p-2"
+              aria-label="Toggle menu"
+            >
+              <svg
+                id="mobile-menu-icon"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  id="menu-lines"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Mobile menu -->
-      <div class="navbar-menu" id="navbar-menu">
-        <a href="/" class="navbar-link">Beranda</a>
-        <a href="products.html" class="navbar-link">Katalog</a>
-        <a href="#promo" class="navbar-link">Promo</a>
-        <a href="#about" class="navbar-link">Tentang Kami</a>
-
-        ${adminLogoutButton.replace('md:ml-4', '').replace('btn-outline', 'btn-outline block w-full text-left')}
+      <div id="mobile-menu" class="mobile-menu bg-white border-t">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a
+            href="/"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 mobile-menu-link"
+          >
+            Beranda
+          </a>
+          <a
+            href="products.html"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 mobile-menu-link"
+          >
+            Katalog
+          </a>
+          <a
+            href="#promo"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 mobile-menu-link"
+          >
+            Promo
+          </a>
+          <a
+            href="#about"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 mobile-menu-link"
+          >
+            Tentang Kami
+          </a>
+        </div>
       </div>
     </nav>
   `;
 
   // Mobile menu functionality
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-  const navbarMenu = document.getElementById('navbar-menu');
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const menuLines = document.getElementById('menu-lines');
+  const menuIcon = document.getElementById('mobile-menu-icon');
 
-  if (mobileMenuToggle && navbarMenu) {
-    mobileMenuToggle.addEventListener('click', function() {
-      navbarMenu.classList.toggle('active');
-      // Toggle hamburger animation
-      mobileMenuToggle.classList.toggle('active');
+  // Ensure mobile menu is hidden by default when component loads
+  if (mobileMenu) {
+    // Make sure it starts in hidden state
+    mobileMenu.classList.remove('active');
+  }
+
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', function() {
+      // Only toggle on small screens (< 768px)
+      if (window.innerWidth < 768) {
+        mobileMenu.classList.toggle('active');
+
+        // Change the menu icon based on state
+        if (mobileMenu.classList.contains('active')) {
+          // Change to close icon (X)
+          menuLines.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+        } else {
+          // Change back to menu icon (bars)
+          menuLines.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+        }
+      }
     });
 
     // Close menu when clicking on a mobile menu link
-    const mobileMenuLinks = document.querySelectorAll('.navbar-menu .navbar-link');
+    const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
     mobileMenuLinks.forEach(link => {
       link.addEventListener('click', function() {
-        navbarMenu.classList.remove('active');
-        mobileMenuToggle.classList.remove('active');
-      });
-    });
-
-    // Close menu when clicking outside of it
-    document.addEventListener('click', function(event) {
-      if (!navbarMenu.contains(event.target) && !mobileMenuToggle.contains(event.target) && navbarMenu.classList.contains('active')) {
-        navbarMenu.classList.remove('active');
-        mobileMenuToggle.classList.remove('active');
-      }
-    });
-  }
-
-  // Add logout functionality if on admin page
-  if (isAdminPage) {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', async function() {
-        try {
-          await window.tokitaAPI.authAPI.logout();
-          // On successful logout, redirect to the home page.
-          window.location.href = 'index.html';
-        } catch (error) {
-          console.error('Logout failed:', error);
-          alert(`Gagal logout: ${error.message}`);
+        // Only close menu on small screens
+        if (window.innerWidth < 768) {
+          mobileMenu.classList.remove('active');
+          // Reset to menu icon (bars)
+          menuLines.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
         }
       });
-    }
+    });
   }
 
-  // Add scroll effect to navbar
-  window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
+  // Handle route changes for SPA-like behavior (if needed)
+  window.addEventListener('popstate', function() {
+    if (mobileMenu) {
+      // Always hide mobile menu on route change
+      mobileMenu.classList.remove('active');
+      // Reset to menu icon (bars)
+      if (menuLines) {
+        menuLines.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+      }
+    }
+  });
+
+  // Handle window resize to properly manage menu state
+  window.addEventListener('resize', function() {
+    // On resize, if we're on desktop view, ensure mobile menu is closed
+    if (window.innerWidth >= 768) {
+      mobileMenu.classList.remove('active');
+      // Reset to menu icon (bars)
+      if (menuLines) {
+        menuLines.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+      }
     }
   });
 }

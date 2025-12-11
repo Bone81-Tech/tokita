@@ -12,113 +12,88 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-50">
-  <!-- Navigation Component -->
-  <div id="navigation-placeholder"></div>
-
-  <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <div class="admin-header">
-        <div>
-          <h1 class="admin-title">Dashboard Produk</h1>
-          <p class="mt-2 text-gray-600">Kelola produk Tokita di sini</p>
+<body>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <span class="text-xl font-bold text-indigo-600">Admin Tokita</span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
+    </nav>
 
-      <!-- Add Product Form -->
-      <div class="bg-white rounded-xl shadow-md mb-8 p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b">Tambah Produk Baru</h2>
-        <form id="product-form" class="space-y-6">
-          <div class="grid grid-cols-1 gap-6">
-            <div>
-              <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
-              <input
-                type="text"
-                name="product-name"
-                id="product-name"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-            </div>
-
-            <div>
-              <label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-              <textarea
-                name="product-description"
-                id="product-description"
-                rows="3"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              ></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div class="px-4 py-6 sm:px-0">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Dashboard Produk</h1>
+        
+        <!-- Add Product Form -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8 p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Tambah Produk Baru</h2>
+          <form id="product-form">
+            <div class="grid grid-cols-1 gap-6">
               <div>
-                <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
-                <input
-                  type="number"
-                  name="product-price"
-                  id="product-price"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
+                <label for="product-name" class="block text-sm font-medium text-gray-700">Nama Produk</label>
+                <input type="text" name="product-name" id="product-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
               </div>
-
+              
               <div>
-                <label for="product-promo-price" class="block text-sm font-medium text-gray-700 mb-1">Harga Promo (Opsional)</label>
-                <input
-                  type="number"
-                  name="product-promo-price"
-                  id="product-promo-price"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
+                <label for="product-description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                <textarea name="product-description" id="product-description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
               </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                <select
-                  name="product-category"
-                  id="product-category"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="sembako">Sembako</option>
-                  <option value="makanan">Makanan Instan</option>
-                  <option value="minuman">Minuman</option>
-                  <option value="rumahtangga">Rumah Tangga</option>
-                </select>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label for="product-price" class="block text-sm font-medium text-gray-700">Harga</label>
+                  <input type="number" name="product-price" id="product-price" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="product-promo-price" class="block text-sm font-medium text-gray-700">Harga Promo (Opsional)</label>
+                  <input type="number" name="product-promo-price" id="product-promo-price" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
               </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label for="product-category" class="block text-sm font-medium text-gray-700">Kategori</label>
+                  <select name="product-category" id="product-category" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="sembako">Sembako</option>
+                    <option value="makanan">Makanan Instan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="rumahtangga">Rumah Tangga</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="product-image" class="block text-sm font-medium text-gray-700">Gambar Produk</label>
+                  <input type="file" name="product-image" id="product-image" accept="image/*" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+              </div>
+              
+              <!-- Form Message Placeholder -->
+              <div id="form-message" class="hidden text-sm p-3 rounded-md"></div>
 
               <div>
-                <label for="product-image" class="block text-sm font-medium text-gray-700 mb-1">Gambar Produk</label>
-                <input
-                  type="file"
-                  name="product-image"
-                  id="product-image"
-                  accept="image/*"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
+                  Simpan Produk
+                </button>
               </div>
             </div>
-
-            <!-- Form Message Placeholder -->
-            <div id="form-message" class="hidden text-sm p-3 rounded-md"></div>
-
-            <div>
-              <button
-                type="submit"
-                class="btn btn-primary px-6 py-3 font-medium"
-              >
-                Simpan Produk
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <!-- Product List -->
-      <div class="bg-white rounded-xl shadow-md">
-        <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b">Daftar Produk</h2>
-          <div id="product-list">
+          </form>
+        </div>
+        
+        <!-- Product List -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <h2 class="text-lg font-medium text-gray-900 mb-4 p-4">Daftar Produk</h2>
+          <div id="product-list" class="p-4">
             <!-- Products will be loaded here -->
             <div class="text-center py-10 text-gray-500">Memuat produk...</div>
           </div>
@@ -126,7 +101,6 @@
       </div>
     </div>
   </div>
-</body>
 
   <!-- Scripts -->
 

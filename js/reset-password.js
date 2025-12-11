@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 1. DENGARKAN EVENT AUTH
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        // Status Auth Berubah: (logging removed for production)
-        // console.log("Status Auth Berubah:", event);
+        console.log("Status Auth Berubah:", event);
 
         if (event === "PASSWORD_RECOVERY") {
             messageDiv.innerHTML = "<span style='color:green'>Verifikasi berhasil. Silakan masukkan password baru.</span>";
@@ -45,11 +44,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
             if (sessionError || !session) {
-                // Session Error during password update: (logging removed for production)
+                console.error("Session Error during password update:", sessionError);
                 throw new Error("Sesi tidak valid atau telah habis. Silakan minta link reset password yang baru.");
             }
 
-            // Sesi valid, mencoba update password... (logging removed for production)
+            console.log("Sesi valid, mencoba update password...");
             messageDiv.innerText = "Sedang memperbarui password...";
 
             const { data, error } = await supabaseClient.auth.updateUser({
@@ -60,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw error;
             }
 
-            // Sukses memperbarui password: (logging removed for production)
+            console.log("Sukses memperbarui password:", data);
             messageDiv.innerHTML = "<span style='color:blue'>Password berhasil diubah! Mengalihkan...</span>";
             
             setTimeout(() => {
@@ -68,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 2000);
 
         } catch (err) {
-            // Gagal dalam proses update password: (logging removed for production)
+            console.error("Gagal dalam proses update password:", err);
             messageDiv.innerHTML = `<span style='color:red'>Gagal: ${err.message}</span>`;
         } finally {
             submitBtn.disabled = false;

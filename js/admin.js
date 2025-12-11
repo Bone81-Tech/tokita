@@ -1,23 +1,25 @@
 // js/admin.js - Rewritten Admin Dashboard for Tokita
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Load navigation component
-  loadNavigation();
-
   // 1. Check authentication immediately
   if (!window.tokitaAPI.authAPI.isAuthenticated()) {
     // If not authenticated, redirect to login page. No alerts.
     window.location.href = 'login.html';
     return; // Stop further execution
   }
-
+  
   // 2. Initial data load
   loadProducts();
-
+  
   // 3. Set up event listeners
   const productForm = document.getElementById('product-form');
   if (productForm) {
     productForm.addEventListener('submit', handleProductSubmit);
+  }
+  
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
   }
 });
 
@@ -192,6 +194,19 @@ async function handleDelete(productId) {
   }
 }
 
+/**
+ * Logs the user out and redirects to the home page.
+ */
+async function handleLogout() {
+    try {
+        await window.tokitaAPI.authAPI.logout();
+        // On successful logout, redirect to the home page.
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout failed:', error);
+        alert(`Gagal logout: ${error.message}`);
+    }
+}
 
 /**
 * Displays a message in the form's message div.

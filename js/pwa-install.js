@@ -57,9 +57,9 @@ function loadPWAInstallButton() {
       // Wait for the user to respond to the prompt
       deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          // User accepted the install prompt (logging removed for production)
+          console.log('User accepted the install prompt');
         } else {
-          // User dismissed the install prompt (logging removed for production)
+          console.log('User dismissed the install prompt');
         }
         deferredPrompt = null;
         pwaInstallContainer.classList.add('hidden');
