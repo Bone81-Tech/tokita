@@ -1,6 +1,9 @@
 // js/login.js - Login functionality for Tokita Admin
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Load navigation component
+  loadNavigation();
+
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
@@ -9,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function handleLogin(event) {
   event.preventDefault();
-  
+
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const errorMessageDiv = document.getElementById('error-message');
@@ -18,13 +21,13 @@ async function handleLogin(event) {
   // Clear previous errors
   errorMessageDiv.classList.add('hidden');
   errorMessageDiv.textContent = '';
-  
+
   if (!email || !password) {
     errorMessageDiv.textContent = 'Email dan password wajib diisi.';
     errorMessageDiv.classList.remove('hidden');
     return;
   }
-  
+
   // Disable button and show loading state
   submitButton.disabled = true;
   submitButton.textContent = 'Memproses...';

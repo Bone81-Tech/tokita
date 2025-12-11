@@ -2,80 +2,79 @@
 
 function loadFooter() {
   const footerPlaceholder = document.getElementById('footer-placeholder');
-  
+
   footerPlaceholder.innerHTML = `
-    <footer class="bg-gray-900 text-white py-12">
+    <footer class="footer">
       <div class="footer-container">
         <div class="footer-grid">
-          <div>
-            <h3 class="text-xl font-bold mb-4">TOKITA</h3>
-            <p class="text-gray-400">
+          <div class="footer-brand">
+            <h3>TOKITA</h3>
+            <p>
               Belanja hemat, hati senang. Lengkapi kebutuhan harianmu di Tokita.
             </p>
           </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-4">Kategori</h4>
-            <ul class="space-y-2">
+          <div class="footer-column">
+            <h4>Kategori</h4>
+            <ul class="footer-links">
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Sembako
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Makanan
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Minuman
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Rumah Tangga
                 </a>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-4">Layanan</h4>
-            <ul class="space-y-2">
+          <div class="footer-column">
+            <h4>Layanan</h4>
+            <ul class="footer-links">
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Cara Belanja
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Promo
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Lokasi Toko
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-400 hover:text-white">
+                <a href="#">
                   Hubungi Kami
                 </a>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-4">Kontak</h4>
-            <address class="not-italic text-gray-400">
+          <div class="footer-column">
+            <h4>Kontak</h4>
+            <address class="footer-contact">
               <p>Jl. Arif Rahman Hakim no. 150 Surabaya</p>
             </address>
           </div>
         </div>
-        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div class="footer-bottom">
           <p>&copy; 2025 Tokita Market. All rights reserved.</p>
           <div class="mt-2">
             <a
               href="login.html"
-              class="text-xs text-gray-600 hover:text-gray-400 transition-colors"
             >
               Admin
             </a>
@@ -85,7 +84,6 @@ function loadFooter() {
               href="https://bonedigitalservice.web.id"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-xs text-gray-600 hover:text-gray-400 transition-colors"
             >
               Developed by Bone Digital Service
             </a>

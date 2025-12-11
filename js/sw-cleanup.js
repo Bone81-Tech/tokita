@@ -13,7 +13,7 @@ function clearServiceWorkerCaches() {
           caches.keys().then(names => {
             const deletePromises = names.map(name => caches.delete(name));
             Promise.all(deletePromises).then(() => {
-              console.log('All caches cleared');
+              // All caches cleared (logging removed for production)
             }).catch(() => {}); // Continue even if cache deletion fails
           }).catch(() => {}); // Continue even if cache names fetch fails
         }

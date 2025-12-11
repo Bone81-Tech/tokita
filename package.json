@@ -4,10 +4,9 @@
   "description": "Tokita Product Showcase - Vanilla HTML/CSS/JS",
   "private": true,
   "scripts": {
-    "dev": "npx http-server -o",
+    "dev": "npx http-server",
     "start": "npx http-server",
-    "preview": "npx serve ."
-  },
+    "preview": "npx serve ."},
   "devDependencies": {},
   "keywords": ["tokita", "e-commerce", "vanilla-js", "pwa"],
   "author": "Bone81-Tech",
