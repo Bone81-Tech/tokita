@@ -54,6 +54,12 @@ const productAPI = {
     return _fetchAPI('/products');
   },
 
+  async getById(id) {
+    const products = await _fetchAPI(`/products?id=eq.${id}&limit=1`);
+    // The API returns an array, but we want a single object for getById
+    return products[0];
+  },
+
   async getByCategory(category) {
     // Basic validation to prevent unnecessary API calls
     const validCategories = ['sembako', 'makanan', 'minuman', 'rumahtangga'];

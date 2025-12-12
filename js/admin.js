@@ -55,10 +55,17 @@ async function loadProducts() {
     // Use event delegation for delete actions
     productListDiv.addEventListener('click', (event) => {
       const deleteButton = event.target.closest('.delete-btn');
+      const editButton = event.target.closest('.edit-btn');
+
       if (deleteButton) {
         const productId = deleteButton.dataset.id;
         if (productId) {
           handleDelete(productId);
+        }
+      } else if (editButton) {
+        const productId = editButton.dataset.id;
+        if (productId) {
+          handleEdit(productId);
         }
       }
     });
@@ -109,9 +116,63 @@ function createProductCardElement(product) {
     return card;
 }
 
+/**
+ * Fetches a product's data and populates the form for editing.
+ * @param {string} productId - The ID of the product to edit.
+ */
+async function handleEdit(productId) {
+    try {
+        const product = await window.tokitaAPI.productAPI.getById(productId);
+        if (product) {
+            populateFormForEdit(product);
+        } else {
+            alert('Produk tidak ditemukan.');
+        }
+    } catch (error) {
+        console.error('Error fetching product for edit:', error);
+        alert(`Gagal memuat detail produk: ${error.message}`);
+    }
+}
 
 /**
- * Handles the product form submission with proper UX for loading and feedback.
+ * Fills the product form with data for editing.
+ * @param {object} product - The product data to populate the form with.
+ */
+function populateFormForEdit(product) {
+    const form = document.getElementById('product-form');
+    // Clear any existing hidden ID
+    const existingIdInput = form.querySelector('#product-id');
+    if (existingIdInput) {
+        existingIdInput.remove();
+    }
+
+    // Set form values
+    document.getElementById('product-name').value = product.name || '';
+    document.getElementById('product-description').value = product.description || '';
+    document.getElementById('product-price').value = product.price || 0;
+    document.getElementById('product-promo-price').value = product.promo_price || '';
+    document.getElementById('product-category').value = product.category || 'sembako';
+    
+    // Create and append hidden input for the product ID
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.id = 'product-id';
+    idInput.value = product.id;
+    form.appendChild(idInput);
+
+    // Change UI to "Edit Mode"
+    form.parentElement.querySelector('h2').textContent = 'Edit Produk';
+    form.querySelector('button[type="submit"]').textContent = 'Update Produk';
+
+    // Scroll to form and focus
+    form.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('product-name').focus();
+}
+
+
+
+/**
+ * Handles the product form submission for both creating and updating products.
  */
 async function handleProductSubmit(event) {
   event.preventDefault();
@@ -119,6 +180,8 @@ async function handleProductSubmit(event) {
   const form = event.target;
   const messageDiv = document.getElementById('form-message');
   const submitButton = form.querySelector('button[type="submit"]');
+  const idInput = form.querySelector('#product-id');
+  const isEditMode = !!idInput;
 
   // Clear previous message
   messageDiv.textContent = '';
@@ -142,24 +205,37 @@ async function handleProductSubmit(event) {
   submitButton.textContent = 'Menyimpan...';
 
   try {
-    let imageUrl = '';
-    // 1. Upload image if it exists
-    if (imageFile) {
-      showFormMessage('Mengupload gambar...', 'info');
-      const uploadResult = await window.tokitaAPI.imagekitAPI.upload(imageFile);
-      imageUrl = uploadResult.url;
+    // 1. Fetch existing product data if in edit mode, to get the old image URL
+    let productData = {};
+    if (isEditMode) {
+      const existingProduct = await window.tokitaAPI.productAPI.getById(idInput.value);
+      productData.image = existingProduct.image; // Start with the old image
     }
 
-    // 2. Create product object
-    const productData = { name, description, price, promo_price: promoPrice, category, image: imageUrl };
+    // 2. Upload a new image if one is provided
+    if (imageFile) {
+      showFormMessage('Mengupload gambar baru...', 'info');
+      const uploadResult = await window.tokitaAPI.imagekitAPI.upload(imageFile);
+      productData.image = uploadResult.url; // Overwrite with new image URL
+    }
 
-    // 3. Submit to API
-    showFormMessage('Menyimpan produk...', 'info');
-    await window.tokitaAPI.productAPI.create(productData);
+    // 3. Populate the rest of the product data
+    productData = { ...productData, name, description, price, promo_price: promoPrice, category };
     
-    // 4. On success
-    showFormMessage('Produk berhasil ditambahkan!', 'success');
-    form.reset();
+    // 4. Submit to API (Create or Update)
+    if (isEditMode) {
+      productData.id = idInput.value;
+      showFormMessage('Mengupdate produk...', 'info');
+      await window.tokitaAPI.productAPI.update(productData);
+      showFormMessage('Produk berhasil diupdate!', 'success');
+    } else {
+      showFormMessage('Menyimpan produk baru...', 'info');
+      await window.tokitaAPI.productAPI.create(productData);
+      showFormMessage('Produk berhasil ditambahkan!', 'success');
+    }
+    
+    // 5. On success, reset the form and UI
+    resetFormToCreateMode();
     loadProducts(); // Refresh the list
 
   } catch (error) {
@@ -168,9 +244,34 @@ async function handleProductSubmit(event) {
   } finally {
     // --- Reset button state ---
     submitButton.disabled = false;
-    submitButton.textContent = 'Simpan Produk';
+    // The button text is reset in resetFormToCreateMode, but we do it here too just in case
+    submitButton.textContent = isEditMode ? 'Update Produk' : 'Simpan Produk'; 
   }
 }
+
+/**
+ * Resets the product form back to its original "Create" state.
+ */
+function resetFormToCreateMode() {
+    const form = document.getElementById('product-form');
+    form.reset();
+
+    // Remove the hidden ID input
+    const idInput = form.querySelector('#product-id');
+    if (idInput) {
+        idInput.remove();
+    }
+
+    // Reset UI text
+    form.parentElement.querySelector('h2').textContent = 'Tambah Produk Baru';
+    form.querySelector('button[type="submit"]').textContent = 'Simpan Produk';
+
+    // Hide any lingering form messages
+    const messageDiv = document.getElementById('form-message');
+    messageDiv.textContent = '';
+    messageDiv.className = 'hidden';
+}
+
 
 /**
  * Deletes a product after user confirmation.
