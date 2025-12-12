@@ -6,10 +6,18 @@
   "scripts": {
     "dev": "npx http-server -o",
     "start": "npx http-server",
-    "preview": "npx serve ."
+    "preview": "npx serve .",
+    "dev:functions": "wrangler pages dev . --local --port 8788 --compatibility-date=2025-12-12"
   },
-  "devDependencies": {},
-  "keywords": ["tokita", "e-commerce", "vanilla-js", "pwa"],
+  "devDependencies": {
+    "wrangler": "^4.54.0"
+  },
+  "keywords": [
+    "tokita",
+    "e-commerce",
+    "vanilla-js",
+    "pwa"
+  ],
   "author": "Bone81-Tech",
   "license": "ISC"
 }

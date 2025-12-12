@@ -136,7 +136,7 @@ async function generateImageKitSignature(privateKey) {
 
   const token = crypto.randomUUID();
   const expire = Math.floor(Date.now() / 1000) + 3600; // Expires in 1 hour
-  const stringToSign = `token=${token}&expire=${expire}`;
+  const stringToSign = token + expire; // The correct format for the string to sign
 
   try {
     // Import the private key for HMAC-SHA1 signing
