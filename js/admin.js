@@ -21,6 +21,30 @@ document.addEventListener('DOMContentLoaded', function() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
   }
+
+  // **********************************************************
+  // *** BARU: Setup Event Delegation Sekali Saja ***
+  // **********************************************************
+  const productListDiv = document.getElementById('product-list');
+  if (productListDiv) {
+    productListDiv.addEventListener('click', (event) => {
+      const deleteButton = event.target.closest('.delete-btn');
+      const editButton = event.target.closest('.edit-btn');
+
+      if (deleteButton) {
+        const productId = deleteButton.dataset.id;
+        if (productId) {
+          handleDelete(productId);
+        }
+      } else if (editButton) {
+        const productId = editButton.dataset.id;
+        if (productId) {
+          handleEdit(productId);
+        }
+      }
+    });
+  }
+  // **********************************************************
 });
 
 /**
@@ -51,25 +75,6 @@ async function loadProducts() {
     });
 
     productListDiv.appendChild(productGrid);
-
-    // Use event delegation for delete actions
-    productListDiv.addEventListener('click', (event) => {
-      const deleteButton = event.target.closest('.delete-btn');
-      const editButton = event.target.closest('.edit-btn');
-
-      if (deleteButton) {
-        const productId = deleteButton.dataset.id;
-        if (productId) {
-          handleDelete(productId);
-        }
-      } else if (editButton) {
-        const productId = editButton.dataset.id;
-        if (productId) {
-          handleEdit(productId);
-        }
-      }
-    });
-
   } catch (error) {
     console.error('Error loading products:', error);
     productListDiv.innerHTML = `<div class="text-center py-10 text-red-500">Gagal memuat produk: ${error.message}</div>`;
@@ -183,6 +188,15 @@ async function handleProductSubmit(event) {
   const idInput = form.querySelector('#product-id');
   const isEditMode = !!idInput;
 
+  console.log('--- handleProductSubmit triggered ---');
+  console.log('Is Edit Mode?', isEditMode);
+  if (idInput) {
+    console.log('Found product-id input with value:', idInput.value);
+  } else {
+    console.log('No product-id input found.');
+  }
+  console.log('------------------------------------');
+
   // Clear previous message
   messageDiv.textContent = '';
   messageDiv.className = 'hidden';
@@ -253,13 +267,17 @@ async function handleProductSubmit(event) {
  * Resets the product form back to its original "Create" state.
  */
 function resetFormToCreateMode() {
+    console.log('--- resetFormToCreateMode called ---');
     const form = document.getElementById('product-form');
     form.reset();
 
     // Remove the hidden ID input
     const idInput = form.querySelector('#product-id');
     if (idInput) {
+        console.log('Found and removing product-id input with value:', idInput.value);
         idInput.remove();
+    } else {
+        console.log('No product-id input found to remove.');
     }
 
     // Reset UI text
@@ -270,6 +288,7 @@ function resetFormToCreateMode() {
     const messageDiv = document.getElementById('form-message');
     messageDiv.textContent = '';
     messageDiv.className = 'hidden';
+    console.log('------------------------------------');
 }
 
 
