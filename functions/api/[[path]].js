@@ -60,17 +60,9 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
     'Prefer': 'return=representation'
   };
 
-  let targetUrl = `${supabaseUrl}/rest/v1/products`;
-
-  if (method === 'GET') {
-    const params = new URLSearchParams();
-    params.append('is_active', 'eq.true'); // Default to active products
-    if (url.searchParams.has('category')) {
-      params.append('category', 'eq.' + url.searchParams.get('category'));
-    }
-    params.append('order', 'id.asc');
-    targetUrl += '?' + params.toString();
-  }
+  // Append the query string from the incoming request to the Supabase URL.
+  // This is crucial for PATCH (update), DELETE, and filtered GET requests.
+  const targetUrl = `${supabaseUrl}/rest/v1/products${url.search}`;
 
   const supabaseRequest = new Request(targetUrl, {
     method: method,
