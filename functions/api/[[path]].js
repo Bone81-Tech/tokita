@@ -60,13 +60,32 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
     'Prefer': 'return=representation'
   };
 
-  // Append the query string from the incoming request to the Supabase URL.
-  // This is crucial for PATCH (update), DELETE, and filtered GET requests.
-  const targetUrl = `${supabaseUrl}/rest/v1/products${url.search}`;
+  let targetUrl = `${supabaseUrl}/rest/v1/products`;
 
-  console.log(`-- handleProducts --
-Method: ${method}
-Target URL: ${targetUrl}`);
+  // For GET, we want to add default filters.
+  // For PATCH and DELETE, we need the query string as the WHERE clause.
+  // For POST, we don't want any query string.
+  if (method === 'GET') {
+    // Start with the incoming URL's search params
+    const params = new URLSearchParams(url.search);
+    
+    // Add default filters if they are not already present
+    if (!params.has('is_active')) {
+      params.append('is_active', 'eq.true');
+    }
+    if (!params.has('order')) {
+      params.append('order', 'id.asc');
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      targetUrl += '?' + queryString;
+    }
+  } else if (method === 'PATCH' || method === 'DELETE') {
+    // For update/delete, the query string is the WHERE clause (e.g., ?id=eq.some-id)
+    targetUrl += url.search;
+  }
+  // For POST, the URL remains clean: /rest/v1/products
 
   const supabaseRequest = new Request(targetUrl, {
     method: method,
