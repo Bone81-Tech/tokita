@@ -115,37 +115,10 @@ function createProductCardElement(product) {
   priceColDiv.appendChild(finalPriceSpan);
 
   priceButtonDiv.appendChild(priceColDiv);
-
-  // Add to cart button
-  const button = document.createElement('button');
-  button.className = 'bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors add-to-cart-btn';
-  button.setAttribute('aria-label', 'Add to cart');
-  button.setAttribute('data-product-id', product.id);
-
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  svg.setAttribute('class', 'h-5 w-5');
-  svg.setAttribute('viewBox', '0 0 20 20');
-  svg.setAttribute('fill', 'currentColor');
-
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', 'M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005.92 1H3z');
-
-  svg.appendChild(path);
-  button.appendChild(svg);
-
-  priceButtonDiv.appendChild(button);
-
   flexDiv.appendChild(infoDiv);
   flexDiv.appendChild(priceButtonDiv);
   contentDiv.appendChild(flexDiv);
   productCard.appendChild(contentDiv);
-
-  // Add to cart button functionality
-  button.addEventListener('click', function() {
-    const productId = this.getAttribute('data-product-id');
-    addToCart(productId);
-  });
 
   return productCard;
 }
