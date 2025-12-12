@@ -63,21 +63,40 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
   let targetUrl = `${supabaseUrl}/rest/v1/products`;
 
   // For GET, we want to add default filters.
-  // For PATCH and DELETE, we need the query string as the WHERE clause.
-  // For POST, we don't want any query string.
   if (method === 'GET') {
     // Start with the incoming URL's search params
-    const params = new URLSearchParams(url.search);
-    
-    // Add default filters if they are not already present
-    if (!params.has('is_active')) {
-      params.append('is_active', 'eq.true');
+    const params = new URLSearchParams(url.search); 
+    const supabaseParams = new URLSearchParams(); // GUNAKAN PARAMETER BARU KHUSUS SUPABASE
+
+    // *** KOREKSI UTAMA UNTUK FILTER KATEGORI ***
+    const category = params.get('category');
+    if (category && category !== 'all') { // Cek apakah kategori ada dan bukan 'all'
+      // Ubah format filter menjadi PostgREST: category=eq.nilai
+      supabaseParams.append('category', `eq.${category}`); 
     }
-    if (!params.has('order')) {
-      params.append('order', 'id.asc');
+
+    // Pindahkan semua parameter filter yang sudah diformat PostgREST ke supabaseParams
+    // Untuk GET, Supabase hanya menerima filter yang sudah di-PostgREST format
+    params.forEach((value, key) => {
+      // Kita hanya perlu memproses parameter yang BUKAN category/default filter
+      // (misalnya filter yang mungkin dikirim frontend yang sudah PostgREST, seperti 'id=eq.uuid')
+      if (key !== 'category') {
+          supabaseParams.append(key, value);
+      }
+    });
+    // ********************************************
+
+
+    // Tambahkan filter default jika belum ada di request asli (menggunakan supabaseParams)
+    if (!supabaseParams.has('is_active')) {
+      supabaseParams.append('is_active', 'eq.true');
+    }
+    if (!supabaseParams.has('order')) {
+      supabaseParams.append('order', 'id.asc');
     }
     
-    const queryString = params.toString();
+    // Sekarang gunakan parameter yang sudah diformat dengan benar
+    const queryString = supabaseParams.toString();
     if (queryString) {
       targetUrl += '?' + queryString;
     }
