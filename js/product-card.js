@@ -46,7 +46,7 @@ function createProductCardElement(product) {
   const img = document.createElement('img');
   img.src = imageUrl;
   img.alt = sanitizedName;
-  img.className = 'w-full h-48 object-cover';
+  img.className = 'w-full h-48 object-contain';
   img.loading = 'lazy';
 
   // Add error handling for image
