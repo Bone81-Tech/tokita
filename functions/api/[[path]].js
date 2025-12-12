@@ -64,6 +64,10 @@ async function handleProducts(request, method, url, supabaseUrl, supabaseService
   // This is crucial for PATCH (update), DELETE, and filtered GET requests.
   const targetUrl = `${supabaseUrl}/rest/v1/products${url.search}`;
 
+  console.log(`-- handleProducts --
+Method: ${method}
+Target URL: ${targetUrl}`);
+
   const supabaseRequest = new Request(targetUrl, {
     method: method,
     headers: headers,
@@ -127,7 +131,7 @@ async function generateImageKitSignature(privateKey) {
   }
 
   const token = crypto.randomUUID();
-  const expire = Math.floor(Date.now() / 1000) + 3600; // Expires in 1 hour
+  const expire = Math.floor(Date.now() / 1000) + 300; // Expires in 5 minutes (300 seconds)
   const stringToSign = token + expire; // The correct format for the string to sign
 
   try {
