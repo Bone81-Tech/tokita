@@ -6,6 +6,7 @@ const CATEGORIES = [
   { id: 'sembako', label: 'Sembako' },
   { id: 'makanan', label: 'Makanan Instan' },
   { id: 'minuman', label: 'Minuman' },
+  { id: 'minuman-instan', label: 'Minuman Instan' }, // New category added here
   { id: 'rumahtangga', label: 'Rumah Tangga' },
 ];
 
