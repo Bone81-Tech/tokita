@@ -43,10 +43,14 @@ function createProductCardElement(product) {
   const relativeDiv = document.createElement('div');
   relativeDiv.className = 'relative';
 
+  // Bungkus gambar dengan container baru
+  const imageWrapper = document.createElement('div');
+  imageWrapper.className = 'product-image-wrapper';
+
   const img = document.createElement('img');
   img.src = imageUrl;
   img.alt = sanitizedName;
-  img.className = 'w-full h-48 object-contain';
+  img.className = 'w-full h-full object-contain'; // object-contain tetap
   img.loading = 'lazy';
 
   // Add error handling for image
@@ -54,8 +58,8 @@ function createProductCardElement(product) {
     this.onerror = null;
     this.src = 'https://placehold.co/400x300?text=Produk+Tokita';
   };
-
-  relativeDiv.appendChild(img);
+  imageWrapper.appendChild(img);
+  relativeDiv.appendChild(imageWrapper);
 
   // Add rating badge if exists
   if (sanitizedRating) {

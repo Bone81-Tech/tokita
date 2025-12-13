@@ -56,5 +56,6 @@ script.sql
 /migrations/ # Assuming these are temporary for database fixes, not source
 .gemini/ # Gemini's internal temporary files
 commit.txt
+saran.txt
 
 # Configuration files (you can override locally)
