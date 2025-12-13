@@ -62,7 +62,7 @@ const productAPI = {
 
   async getByCategory(category) {
     // Basic validation to prevent unnecessary API calls
-    const validCategories = ['sembako', 'makanan', 'minuman', 'rumahtangga'];
+    const validCategories = ['sembako', 'makanan', 'minuman', 'rumahtangga', 'minuman-instan'];
     if (!validCategories.includes(category)) {
       console.error(`Invalid category requested: ${category}`);
       return [];
@@ -194,7 +194,7 @@ function validateProductData(product) {
       return { valid: false, error: 'Product price must be a positive number' };
     }
   
-    const validCategories = ['sembako', 'makanan', 'minuman', 'rumahtangga'];
+    const validCategories = ['sembako', 'makanan', 'minuman', 'rumahtangga', 'minuman-instan'];
     if (!validCategories.includes(product.category)) {
       return { valid: false, error: 'Invalid product category' };
     }
